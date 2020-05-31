@@ -1,3 +1,9 @@
 [submodule "oh-my-zsh"]
 	path = oh-my-zsh
 	url = https://github.com/robbyrussell/oh-my-zsh.git
+[submodule ".local/fonts/powerline"]
+	path = .local/fonts/powerline
+	url = https://github.com/powerline/fonts.git
+[submodule "homedir/.vim/bundle/Vundle.vim"]
+	path = homedir/.vim/bundle/Vundle.vim
+	url = git://github.com/VundleVim/Vundle.vim.git

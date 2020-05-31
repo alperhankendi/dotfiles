@@ -96,6 +96,9 @@ zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor       no
 # trigger another completion with this key binding. Great for completing file paths.
 zstyle ':fzf-tab:*'                              continuous-trigger tab
 
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # Autoload functions.
 autoload -Uz zmv
 
