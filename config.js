@@ -22,13 +22,17 @@ module.exports = {
     'yarn',
     'k9s',
     'kind',
-    'skaffold' //https://skaffold.dev/docs/
+    'skaffold', //https://skaffold.dev/docs/,
+    'asciinema'
   ],
   cask: [
     'docker',
     'evernote',
     'iterm2',
     'visual-studio-code',
+    'dropbox',
+    'slack',
+    'dotnet'
   ],
   gem: [
   ],
