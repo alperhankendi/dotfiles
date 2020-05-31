@@ -3,7 +3,7 @@
 I will update your MacOS machine with Better™ system defaults, preferences, software configuration and even auto-install some handy development tools and apps that my developer friends find helpful.
 
 
-![screencast](https://raw.githubusercontent.com/alperhankendi/dotfiles/master/img/img.gif)
+![screencast](https://raw.githubusercontent.com/alperhankendi/dotfiles/master/img/cast.gif)
 
 # Forget About Manual Configuration!
 
