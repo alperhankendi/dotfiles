@@ -1,0 +1,36 @@
+{
+  "name": "dotfiles",
+  "version": "4.4.3",
+  "description": "personell dotfiles for macos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alperhankendi/dotfiles.git"
+  },
+  "keywords": [
+    "dotfiles",
+    "osx",
+    "macos",
+    "automation",
+    "setup",
+    "developer",
+    "iterm",
+    "commandline",
+    "bootstrap"
+  ],
+  "author": "Alper Hankendi <ahankendi@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alperhankendi/dotfiles/issues"
+  },
+  "homepage": "https://github.com/alperhankendi/dotfiles#readme",
+  "dependencies": {
+    "async.series": "0.5.2",
+    "inquirer": "6.2.2",
+    "node-emoji": "1.10.0"
+  }
+}

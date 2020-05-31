@@ -1,0 +1,94 @@
+function iterm2_print_user_vars() {
+  iterm2_set_user_var k8sContext $(kubectl config current-context)
+}
+
+
+#########################################
+# Utility Functions
+
+# Create a new git repo with one README commit and CD into it
+function gitnr() { mkdir $1; cd $1; git init; touch README; git add README; git commit -mFirst-commit;}
+
+# Do a Matrix movie effect of falling characters
+function matrix1() {
+echo -e "\e[1;40m" ; clear ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) ;sleep 0.05; done|gawk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}'
+}
+
+function matrix2() {
+echo -e "\e[1;40m" ; clear ; characters=$( jot -c 94 33 | tr -d '\n' ) ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) $characters ;sleep 0.05; done|gawk '{ letters=$5; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}'
+}
+
+# Show normally hidden system and dotfile types of files
+# in Mac OS Finder
+function showhiddenfiles() {
+  defaults write com.apple.Finder AppleShowAllFiles YES
+  osascript -e 'tell application "Finder" to quit'
+  sleep 0.25
+  osascript -e 'tell application "Finder" to activate'
+}
+
+# Hide (back to defaults) normally hidden system and dotfile types of files
+# in Mac OS Finder
+function hidehiddenfiles() {
+  defaults write com.apple.Finder AppleShowAllFiles NO
+  osascript -e 'tell application "Finder" to quit'
+  sleep 0.25
+  osascript -e 'tell application "Finder" to activate'
+}
+
+## hammer a service with curl for a given number of times
+## usage: curlhammer $url
+function curlhammer () {
+  bot "about to hammer $1 with $2 curls ⇒";
+  echo "curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'"
+  for i in {1..$2}
+  do
+    curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'
+  done
+  bot "done"
+}
+
+## curlheader will return only a specific response header or all response headers for a given URL
+## usage: curlheader $header $url
+## usage: curlheader $url
+function curlheader() {
+  if [[ -z "$2" ]]; then
+    echo "curl -k -s -D - $1 -o /dev/null"
+    curl -k -s -D - $1 -o /dev/null:
+  else
+    echo "curl -k -s -D - $2 -o /dev/null | grep $1:"
+    curl -k -s -D - $2 -o /dev/null | grep $1:
+  fi
+}
+
+## get the timings for a curl to a URL
+## usage: curltime $url
+function curltime(){
+  curl -w "   time_namelookup:  %{time_namelookup}\n\
+      time_connect:  %{time_connect}\n\
+   time_appconnect:  %{time_appconnect}\n\
+  time_pretransfer:  %{time_pretransfer}\n\
+     time_redirect:  %{time_redirect}\n\
+time_starttransfer:  %{time_starttransfer}\n\
+--------------------------\n\
+        time_total:  %{time_total}\n" -o /dev/null -s "$1"
+}
+
+function fixperms(){
+    find . \( -name "*.sh" -or -type d \) -exec chmod 755 {} \; && find . -type f ! -name "*.sh" -exec chmod 644 {} \;
+}
+
+# Create a new directory and enter it
+function mkd() {
+  mkdir -p "$@" && cd "$_";
+}
+
+
+## output directory/file tree, excluding ignorables
+function tre(){
+  tree -aC -I '.git|node_modules|bower_components|.DS_Store' --dirsfirst "$@"
+}
+
+log() {
+  echo >&2 "[~/.zshrc] $(tput setaf 245)$*$(tput sgr0)"
+}
