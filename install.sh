@@ -61,9 +61,6 @@ if [[ $response =~ (y|yes|Y) ]];then
   require_brew fontconfig
   ./.local/fonts/install.sh
   ./.local/fonts/powerline/install.sh  
-
-  mkdir ~/.vim/colors
-  cp ./homedir/.vim/colors/solarized.vim ~/.vim/colors
   ok
 fi
 
