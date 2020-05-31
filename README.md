@@ -12,7 +12,7 @@ Its kind pain in the ass. That's why we automate; we did it once and we don't wa
 
 When I finish with your machine, you will be able to look at your command-line in full-screen mode like this (running iTerm):
 
-![iTerm Screenshot](https://raw.githubusercontent.com/alperhankendi/dotfiles/master/img/bg.png){:class="img-responsive"}
+![iTerm Screenshot](https://raw.githubusercontent.com/alperhankendi/dotfiles/master/img/bg.png)
 
 Check out how your shell prompt includes the full path, node.js version & the working git branch along with a lot of other info!
 I use powerlevel10k (upgraded from powerlevel9k, 10x better performence) for command prompt, so customization of what you want is easily changable in `./.zshrc`
