@@ -23,7 +23,8 @@ module.exports = {
     'k9s',
     'kind',
     'skaffold', //https://skaffold.dev/docs/,
-    'asciinema'
+    'asciinema',
+    'minikube'
   ],
   cask: [
     'docker',

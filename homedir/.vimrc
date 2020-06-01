@@ -32,8 +32,8 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'ekalinin/dockerfile.vim'
 " Plugin 'Valloric/YouCompleteMe'
 " Navigation (IDE frame)
-"Plugin 'scrooloose/nerdtree'
-"Plugin 'jistr/vim-nerdtree-tabs'
+Plugin 'scrooloose/nerdtree'
+Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'tpope/vim-fugitive'
@@ -69,10 +69,8 @@ Plugin 'SuperTab'
 " Install L9 and avoid a Naming conflict if you've already installed a
 " different version somewhere else.
 " Plugin 'ascenator/L9', {'name': 'newL9'}
-" TypeScript
-" Plugin 'leafgarland/typescript-vim'
-" Vue.js
 Plugin 'posva/vim-vue'
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
