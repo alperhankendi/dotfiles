@@ -21,6 +21,21 @@ function require_cask() {
     ok
 }
 
+
+function require_brewtap() {
+    running "brewtab $1 $2"
+    brew list $1 > /dev/null 2>&1 | true
+    if [[ ${PIPESTATUS[0]} != 0 ]]; then
+        
+        action "brew tap $1 $2"
+        brew tap $1 $2
+        if [[ $? != 0 ]]; then
+            error "failed to tapping $1! aborting..."
+            # exit -1
+        fi
+    fi
+    ok
+}
 function require_brew() {
     running "brew $1 $2"
     brew list $1 > /dev/null 2>&1 | true

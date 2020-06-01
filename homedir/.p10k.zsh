@@ -109,6 +109,16 @@
     # example               # example user-defined segment (see prompt_example function below)
   )
 
+  #   Font Provider                    | POWERLEVEL9K_MODE
+  #   ---------------------------------+-------------------
+  #   Powerline                        | powerline
+  #   Font Awesome                     | awesome-fontconfig
+  #   Adobe Source Code Pro            | awesome-fontconfig
+  #   Source Code Pro                  | awesome-fontconfig
+  #   Awesome-Terminal Fonts (regular) | awesome-fontconfig
+  #   Awesome-Terminal Fonts (patched) | awesome-patched
+  #   Nerd Fonts                       | nerdfont-complete
+  #   Other                            | compatible
   # Defines character set used by powerlevel10k. It's best to let `p10k configure` set it for you.
   typeset -g POWERLEVEL9K_MODE=nerdfont-complete
   # When set to `moderate`, some icons will have an extra space after them. This is meant to avoid

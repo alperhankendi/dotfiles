@@ -1,8 +1,8 @@
 [user]
-  name = Alper Hankendi
-  email = ahankendi@gmail.com
+  name = GITHUBFULLNAME
+  email = GITHUBEMAIL
 [github]
-  user = alperhankendi
+  user = GITHUBUSER
 [color]
   ui = auto
   # diff = auto

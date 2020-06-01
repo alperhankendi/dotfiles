@@ -81,7 +81,6 @@ alias spoton="sudo mdutil -a -i on"
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
 alias update='sudo softwareupdate -i -a; brew update; brew upgrade; brew cleanup; mas upgrade; npm install npm -g; npm update -g; sudo gem update --system; sudo gem update; sudo gem cleanup'
-
 alias vtop="vtop --theme wizard"
 
 alias code="/Applications/Visual\\ Studio\\ Code.app/contents/Resources/app/bin/code"
@@ -104,11 +103,13 @@ alias kgsvc='kubectl get service'
 #lazy docker
 alias lzd='lazydocker'
 #docker-compose
+alias d='docker'
+alias dps='docker ps -a'
+
 alias ddown='docker-compose down'
 alias dup='docker-compose up -d --build --force-recreate'
 #network stuff
 netstat -ant | grep :8000 | awk '{print $6}' | sort | uniq -c | sort -n
-
 netstat -na | grep ":5000" |wc -l
 
 

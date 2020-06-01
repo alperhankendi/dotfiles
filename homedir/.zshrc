@@ -69,13 +69,14 @@ z4h source ~/.dotfiles/ssh-agent.zsh
 
 fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)
 
+autoload -Uz zsh-defer
 
 #############################################################
 # Generic configuration that applies to all shells
 #############################################################
-source ~/.shellfn
-source ~/.shellaliases
-
+z4h source ~/.shellfn
+z4h source ~/.shellaliases
+z4h source ~/.dotfiles/dircolor.zsh
 
 # Source additional local files.
 if [[ $LC_TERMINAL == iTerm2 ]]; then
@@ -106,7 +107,7 @@ autoload -Uz zmv
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
 
-
-
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots  # glob matches files starting with dot; `ls *` becomes equivalent to `ls *(D)`
+
+
