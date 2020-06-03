@@ -30,6 +30,7 @@ call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 "Plugin 'junegunn/fzf'
 Plugin 'ekalinin/dockerfile.vim'
+Plugin 'frazrepo/vim-rainbow'
 " Plugin 'Valloric/YouCompleteMe'
 " Navigation (IDE frame)
 Plugin 'scrooloose/nerdtree'
@@ -337,6 +338,15 @@ let g:syntastic_enable_tslint_checker = 1
 "let g:syntastic_typescript_checkers = ['tslint', 'tsc']
 let g:syntastic_enable_pug_checker = 1
 let g:syntastic_pug_checkers = ['jade','pug']
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"  Vim-rainbow
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+au FileType c,cpp,objc,objcpp call rainbow#load()
+let g:rainbow_active = 1
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
