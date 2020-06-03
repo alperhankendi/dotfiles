@@ -29,7 +29,7 @@ require_brew git
 #git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
 # sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"
 
-
+#
 # set zsh as the user login shell
 #changeShell
 
@@ -45,8 +45,8 @@ if [[ $response =~ (y|yes|Y) ]];then
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-
   vim +PluginInstall +qall > /dev/null 2>&1
+  vim -u NONE -c "helptags vim-gitgutter/doc" -c q
   ok
 else
   ok "skipped. Install by running :PluginInstall within vim"

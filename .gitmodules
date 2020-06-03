@@ -7,3 +7,6 @@
 [submodule "homedir/.vim/bundle/Vundle.vim"]
 	path = homedir/.vim/bundle/Vundle.vim
 	url = git://github.com/VundleVim/Vundle.vim.git
+[submodule "homedir/.vim/pack/airblade/start"]
+	path = homedir/.vim/pack/airblade/start
+	url = https://github.com/airblade/vim-gitgutter.git
