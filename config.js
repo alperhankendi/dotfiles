@@ -19,7 +19,8 @@ module.exports = {
     'skaffold', //https://skaffold.dev/docs/,
     'asciinema',
     'minikube',
-    'lssh'
+    'lssh',
+    'entr'
   ],
   cask: [
     'docker',

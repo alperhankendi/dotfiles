@@ -117,3 +117,4 @@ netstat -na | grep ":5000" |wc -l
 # development stuff
 alias fake-server='npx http-server -p $1'
 alias fake-smtp='docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:v3'
+alias gorun='find . |grep '\.go$' | entr -r go run .'
