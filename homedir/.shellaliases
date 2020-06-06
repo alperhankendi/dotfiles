@@ -61,7 +61,8 @@ alias -- -="cd -"
 alias path='echo -e ${PATH//:/\\n}'
 
 # Copy and paste and prune the usless newline
-alias pbcopynn='tr -d "\n" | pbcopy'
+alias pb='tr -d "\n" | pbcopy'
+alias pt='pbpaste | tee'
 
 # firewall management
 alias port-forward-enable="echo 'rdr pass inet proto tcp from any to any port 2376 -> 127.0.0.1 port 2376' | sudo pfctl -ef -"
