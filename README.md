@@ -2,7 +2,6 @@
 
 I will update your MacOS machine with Better™ system defaults, preferences, software configuration and even auto-install some handy development tools and apps that my developer friends find helpful.
 
-
 ![screencast](https://raw.githubusercontent.com/alperhankendi/dotfiles/master/img/cast.gif)
 
 # Forget About Manual Configuration!
@@ -20,7 +19,7 @@ The top terminal is using vim as a full replacement IDE.
 The bottom left two are git terminals.
 The bottom right is running `vtop`
 
-To launch fullscreen, hit `Command + Enter` in iTerm, then use `Command + d` and `Command + D` to create split panes.
+To launch fullscreen, hit `Command + Enter` in iTerm, then use `Command + d` to create split panes.
 
 
 # Installation
@@ -33,11 +32,32 @@ cd ~/.dotfiles;
 # run this using terminal (not iTerm, lest iTerm settings get discarded on exit)
 ./install.sh
 ```
-* When it finishes, open iTerm and press `Command + ,` to open preferences. Under Profiles > Colors, select "Load Presets" and choose the `Solarized Dark Patch` scheme. If it isn't there for some reason, import it from `~/.dotfiles/configs` -- you may also need to select the `Hack` font and check the box for non-ascii font and set to `MesloLGS NG` 
-* I've also found that you need to reboot before fast key repeat will be enabled
 
 > Note: running install.sh is idempotent. You can run it again and again as you add new features or software to the scripts! I'll regularly add new configurations so keep an eye on this repo as it grows and optimizes.
 
+## Settings Sync
+
+1. Open iTerm2 and press `Command + ,` to open preferences. 
+1. Preferences->*Load Preferences* From: ~/.dotfiles/com.googlecode.iterm2.plist directory.
+
+1. Restart iTerm2.
+
+## SubModule
+```bash
+[submodule "oh-my-zsh"]
+	path = oh-my-zsh
+	url = https://github.com/robbyrussell/oh-my-zsh.git
+[submodule ".local/fonts/powerline"]
+	path = .local/fonts/powerline
+	url = https://github.com/powerline/fonts.git
+[submodule "homedir/.vim/bundle/Vundle.vim"]
+	path = homedir/.vim/bundle/Vundle.vim
+	url = git://github.com/VundleVim/Vundle.vim.git
+[submodule "homedir/.vim/pack/airblade/start"]
+	path = homedir/.vim/pack/airblade/start
+	url = https://github.com/airblade/vim-gitgutter.git
+
+```
 
 
 # Settings
@@ -164,13 +184,6 @@ Here is the current list:
 - Enable the Develop menu and the Web Inspector in Safari
 - Add a context menu item for showing the Web Inspector in web views
 
-## Configuring Mail
-- Disable send and reply animations in Mail.app
-- Copy email addresses as 'foo@example.com' instead of 'Foo Bar <foo@example.com>' in Mail.app
-- Add the keyboard shortcut ⌘ + Enter to send an email in Mail.app
-- Display emails in threaded mode, sorted by date (oldest at the top)
-- Disable inline attachments (just show the icons)
-- Disable automatic spell checking
 
 ## Spotlight
 - Disable Spotlight indexing for any volume that gets mounted and has not yet been indexed
@@ -217,16 +230,4 @@ Here is the current list:
 - Don’t show the preferences window on next start
 
 
-## SubModule
-```bash
-[submodule "oh-my-zsh"]
-	path = oh-my-zsh
-	url = https://github.com/robbyrussell/oh-my-zsh.git
-[submodule ".local/fonts/powerline"]
-	path = .local/fonts/powerline
-	url = https://github.com/powerline/fonts.git
-[submodule "homedir/.vim/bundle/Vundle.vim"]
-	path = homedir/.vim/bundle/Vundle.vim
-	url = git://github.com/VundleVim/Vundle.vim.git
 
-```
