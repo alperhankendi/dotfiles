@@ -59,6 +59,11 @@ cd ~/.dotfiles;
 
 ```
 
+# Useful stuff
+
+* [Aliases](https://github.com/alperhankendi/dotfiles/blob/master/homedir/.shellaliases)
+* [Utility Functions](https://github.com/alperhankendi/dotfiles/blob/master/homedir/.shellfn)
+* [Vim Settings](https://github.com/alperhankendi/dotfiles/blob/master/homedir/.vimrc)
 
 # Settings
 This project changes a number of settings and configures software on MacOS.
@@ -228,6 +233,3 @@ Here is the current list:
 ## SizeUp.app
 - Start SizeUp at login
 - Don’t show the preferences window on next start
-
-
-
