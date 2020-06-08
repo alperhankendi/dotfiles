@@ -32,6 +32,7 @@ module.exports = {
     'dotnet'
   ],
   gem: [
+    'mdless'
   ],
   npm: [
     'prettyjson',
