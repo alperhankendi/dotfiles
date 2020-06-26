@@ -35,12 +35,6 @@ cd ~/.dotfiles;
 
 > Note: running install.sh is idempotent. You can run it again and again as you add new features or software to the scripts! I'll regularly add new configurations so keep an eye on this repo as it grows and optimizes.
 
-## Settings Sync
-
-1. Open iTerm2 and press `Command + ,` to open preferences. 
-1. Preferences->*Load Preferences* From: ~/.dotfiles/com.googlecode.iterm2.plist directory.
-
-1. Restart iTerm2.
 
 ## SubModule
 ```bash

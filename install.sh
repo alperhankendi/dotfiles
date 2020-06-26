@@ -94,7 +94,9 @@ brew cleanup --force > /dev/null 2>&1
 rm -f -r /Library/Caches/Homebrew/* > /dev/null 2>&1
 ok
 
-
+#customize iterm2
+bot "preparing the iterm2 config"
+cp com.googlecode.iterm2.plist  ~/Library/Preferences/com.googlecode.iterm2.plist
 
 
 ## OS Configuration for MacOS
