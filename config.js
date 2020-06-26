@@ -20,7 +20,9 @@ module.exports = {
     'asciinema',
     'minikube',
     'lssh',
-    'entr'
+    'entr',
+    'graphviz',
+    'hub'
   ],
   cask: [
     'docker',
@@ -29,7 +31,8 @@ module.exports = {
     'visual-studio-code',
     'dropbox',
     'slack',
-    'dotnet'
+    'dotnet',
+    'clipy'
   ],
   gem: [
     'mdless'

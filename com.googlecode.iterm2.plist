@@ -41,9 +41,13 @@
 	<key>LoadPrefsFromCustomFolder</key>
 	<true/>
 	<key>NSNavLastRootDirectory</key>
-	<string>~/.dotfiles/node_modules</string>
+	<string>~/Desktop</string>
+	<key>NSNavLastUserSetHideExtensionButtonState</key>
+	<false/>
 	<key>NSNavPanelExpandedSizeForOpenMode</key>
 	<string>{799, 448}</string>
+	<key>NSNavPanelExpandedSizeForSaveMode</key>
+	<string>{841, 448}</string>
 	<key>NSQuotedKeystrokeBinding</key>
 	<string></string>
 	<key>NSRepeatCountBinding</key>
@@ -86,9 +90,11 @@
 		<integer>1</integer>
 	</dict>
 	<key>NSWindow Frame NSNavPanelAutosaveName</key>
-	<string>560 456 799 448 0 -1050 1680 1027 </string>
+	<string>539 440 841 470 0 -1050 1680 1027 </string>
+	<key>NSWindow Frame SUUpdateAlert</key>
+	<string>530 0 620 392 0 -1050 1680 1027 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>540 122 920 511 0 0 1680 1027 </string>
+	<string>0 1057 1920 425 0 0 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>247 107 570 463 0 0 1920 1057 </string>
 	<key>New Bookmarks</key>
@@ -787,6 +793,8 @@
 			</dict>
 			<key>Send Code When Idle</key>
 			<false/>
+			<key>Session Close Undo Timeout</key>
+			<integer>30</integer>
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Status Bar</key>
@@ -1236,6 +1244,8 @@
 			<integer>2</integer>
 			<key>Transparency</key>
 			<real>0.0</real>
+			<key>Triggers</key>
+			<array/>
 			<key>Unlimited Scrollback</key>
 			<true/>
 			<key>Use Bold Font</key>
@@ -2448,14 +2458,14 @@
 		<key>screenFrame</key>
 		<string>{{0, 0}, {1920, 1080}}</string>
 		<key>topLeft</key>
-		<string>{77, 1018}</string>
+		<string>{311, 863}</string>
 	</dict>
 	<key>NoSyncInstallationId</key>
 	<string>78A242DA-051E-4B96-A3D7-C3AD0B567856</string>
 	<key>NoSyncLastTipTime</key>
-	<real>613173701.27961504</real>
+	<real>613327916.27091396</real>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>4</integer>
+	<integer>5</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
@@ -3188,12 +3198,51 @@
 			</dict>
 		</array>
 	</dict>
+	<key>NoSyncSavePanelSavedSettings_SaveProfile</key>
+	<dict>
+		<key>Initial Directory</key>
+		<string>/Users/ahankendi/Desktop</string>
+	</dict>
+	<key>NoSyncSuppressDownloadConfirmation</key>
+	<true/>
+	<key>NoSyncSuppressDownloadConfirmation_selection</key>
+	<integer>0</integer>
 	<key>NoSyncTipOfTheDayEligibilityBeganTime</key>
 	<real>612714519.27076006</real>
 	<key>NoSyncTipsToNotShow</key>
 	<array>
+		<string>0004</string>
+		<string>0000</string>
+		<string>0010</string>
+		<string>0007</string>
+		<string>0003</string>
+		<string>0006</string>
+		<string>0002</string>
 		<string>000</string>
+		<string>0009</string>
+		<string>0005</string>
+		<string>0001</string>
+		<string>0008</string>
+		<string>0011</string>
 	</array>
+	<key>NoSyncToolbeltProportions</key>
+	<dict>
+		<key>proportions</key>
+		<array>
+			<dict>
+				<key>heightAsFraction</key>
+				<real>0.50190114068441061</real>
+				<key>name</key>
+				<string>Profiles</string>
+			</dict>
+			<dict>
+				<key>heightAsFraction</key>
+				<real>0.49809885931558934</real>
+				<key>name</key>
+				<string>Captured Output</string>
+			</dict>
+		</array>
+	</dict>
 	<key>PointerActions</key>
 	<dict>
 		<key>Button,1,1,,</key>
@@ -3240,9 +3289,13 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2020-06-06T22:01:41Z</date>
+	<date>2020-06-08T22:01:47Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
+	<key>SUUpdateGroupIdentifier</key>
+	<integer>4164400927</integer>
+	<key>SUUpdateRelaunchingMarker</key>
+	<true/>
 	<key>SoundForEsc</key>
 	<false/>
 	<key>StatusBarPosition</key>
@@ -3253,6 +3306,13 @@
 	<integer>0</integer>
 	<key>TabsHaveCloseButton</key>
 	<true/>
+	<key>TimeBetweenTips</key>
+	<real>604800</real>
+	<key>ToolbeltTools</key>
+	<array>
+		<string>Profiles</string>
+		<string>Captured Output</string>
+	</array>
 	<key>UseBorder</key>
 	<false/>
 	<key>VisualIndicatorForEsc</key>
