@@ -94,7 +94,7 @@
 	<key>NSWindow Frame SUUpdateAlert</key>
 	<string>530 0 620 392 0 -1050 1680 1027 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 1057 1920 425 0 0 1920 1057 </string>
+	<string>63 388 1053 639 0 0 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>247 107 570 463 0 0 1920 1057 </string>
 	<key>New Bookmarks</key>
@@ -2442,6 +2442,7 @@
 	</array>
 	<key>NoSyncAllAppVersions</key>
 	<array>
+		<string>3.3.11</string>
 		<string>3.3.10</string>
 	</array>
 	<key>NoSyncBFPFavorites</key>
@@ -2456,16 +2457,16 @@
 	<key>NoSyncFrame_SharedPreferences</key>
 	<dict>
 		<key>screenFrame</key>
-		<string>{{0, 0}, {1920, 1080}}</string>
+		<string>{{0, 0}, {1680, 1050}}</string>
 		<key>topLeft</key>
-		<string>{311, 863}</string>
+		<string>{967, 620}</string>
 	</dict>
 	<key>NoSyncInstallationId</key>
 	<string>78A242DA-051E-4B96-A3D7-C3AD0B567856</string>
 	<key>NoSyncLastTipTime</key>
-	<real>613327916.27091396</real>
+	<real>614558967.23773098</real>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>5</integer>
+	<integer>15</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
@@ -3219,11 +3220,13 @@
 		<string>0006</string>
 		<string>0002</string>
 		<string>000</string>
+		<string>0012</string>
 		<string>0009</string>
 		<string>0005</string>
 		<string>0001</string>
-		<string>0008</string>
 		<string>0011</string>
+		<string>0008</string>
+		<string>0013</string>
 	</array>
 	<key>NoSyncToolbeltProportions</key>
 	<dict>
@@ -3289,13 +3292,13 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2020-06-08T22:01:47Z</date>
+	<date>2020-06-25T21:56:13Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>SUUpdateGroupIdentifier</key>
 	<integer>4164400927</integer>
 	<key>SUUpdateRelaunchingMarker</key>
-	<true/>
+	<false/>
 	<key>SoundForEsc</key>
 	<false/>
 	<key>StatusBarPosition</key>
@@ -3320,6 +3323,6 @@
 	<key>WindowNumber</key>
 	<true/>
 	<key>iTerm Version</key>
-	<string>3.3.10</string>
+	<string>3.3.11</string>
 </dict>
 </plist>
