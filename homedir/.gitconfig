@@ -76,3 +76,5 @@
 	trustExitCode = true
 [commit]
 	template = /Users/ahankendi/.stCommitMsg
+[hub]
+	protocol = https
