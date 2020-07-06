@@ -1,8 +1,8 @@
 [user]
-	name = Alper Hankendi
-	email = ahankendi@gmail.com
+  name = GITHUBFULLNAME
+  email = GITHUBEMAIL
 [github]
-  user = alperhankendi
+  user = GITHUBUSER
 [color]
   ui = auto
   # diff = auto
@@ -40,7 +40,6 @@
   autocrlf = input
   safecrlf = warn
   editor = vim
-	excludesfile = /Users/ahankendi/.gitignore_global
 [apply]
   whitespace = nowarn
 
@@ -74,7 +73,3 @@
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
-[commit]
-	template = /Users/ahankendi/.stCommitMsg
-[hub]
-	protocol = https
