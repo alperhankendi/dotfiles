@@ -3,3 +3,5 @@ node_modules
 package-lock.json
 ssh-agent.zsh.zwc
 homedir/.gitconfig.org
+dircolor.zsh.zwc
+homedir/.gitconfig.alper
