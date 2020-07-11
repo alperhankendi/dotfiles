@@ -22,7 +22,8 @@ module.exports = {
     'lssh',
     'entr',
     'graphviz',
-    'hub'
+    'hub',
+    'tree'
   ],
   cask: [
     'docker',
