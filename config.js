@@ -23,7 +23,8 @@ module.exports = {
     'entr',
     'graphviz',
     'hub',
-    'tree'
+    'tree',
+    'hadolint'   //https://github.com/hadolint/hadolint
   ],
   cask: [
     'docker',
