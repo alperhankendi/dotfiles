@@ -110,4 +110,4 @@ compdef _directories md
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots  # glob matches files starting with dot; `ls *` becomes equivalent to `ls *(D)`
 
-
+fortune|cowsay

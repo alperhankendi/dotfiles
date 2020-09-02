@@ -25,6 +25,8 @@ module.exports = {
     'hub',
     'tree',
     'hadolint'   //https://github.com/hadolint/hadolint
+    'cowsay',
+    'fortune'
   ],
   cask: [
     'docker',
@@ -34,7 +36,8 @@ module.exports = {
     'dropbox',
     'slack',
     'dotnet',
-    'clipy'
+    'clipy',
+    'alfred'
   ],
   gem: [
     'mdless'
