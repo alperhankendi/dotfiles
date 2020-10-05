@@ -1,7 +1,7 @@
 module.exports = {
   brewtap: [
     'blacknon/lssh',
-    'derailed/k9s'
+    'derailed/k9s',
   ],
   brew: [
     'bat',              // alternative to `cat`: https://github.com/sharkdp/bat
@@ -26,7 +26,9 @@ module.exports = {
     'tree',
     'hadolint'   //https://github.com/hadolint/hadolint
     'cowsay',
-    'fortune'
+    'fortune',
+    'gnebbia/kb/kb',
+    'dust'
   ],
   cask: [
     'docker',
