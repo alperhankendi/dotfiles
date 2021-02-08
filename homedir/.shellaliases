@@ -118,7 +118,23 @@ netstat -na | grep ":5000" |wc -l
 # development stuff
 alias fake-server='npx http-server -p $1'
 alias fake-smtp='docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:v3'
-alias gorun='find . |grep '\.go$' | entr -r go run .'
+alias gorun="find . -type f -name '*.go' | entr -rc go run ."
 alias image='~/.dotfiles/imgcat.sh $1'
 
 alias krakend-config2dot='/Users/ahankendi/go/src/github.com/devopsfaith/krakend-config2dot/cmd/krakend-config2dot/krakend-config2dot'
+
+
+##github alias
+alias gc='_git_dbg commit -S -v -s'
+alias gdc='_git_dbg diff --cached'
+alias git='hub'
+alias gpp='_git_dbg push alperhankendi HEAD && hub pull-request --browse'
+alias gpah='_git_dbg push alperhankendi HEAD'
+alias glah='_git_dbg pull alperhankendi HEAD'
+alias gfah='_git_dbg fetch alperhankendi'
+alias glom='_git_dbg pull origin master --tags'
+alias gloh='_git_dbg pull origin HEAD --tags'
+alias grom='_git_dbg rebase origin/master'
+alias gpoh='_git_dbg push origin HEAD'
+alias gbv="git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'"
+
