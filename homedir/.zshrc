@@ -110,4 +110,11 @@ compdef _directories md
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots  # glob matches files starting with dot; `ls *` becomes equivalent to `ls *(D)`
 
-fortune|cowsay
+cowsay -d `echo $(curl -s "https://v2.jokeapi.dev/joke/Programming?blacklistFlags=religious,political,racist,sexist,explicit&format=txt&type=twopart")`
+#fortune|cowsay
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ahankendi/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/ahankendi/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ahankendi/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ahankendi/google-cloud-sdk/completion.zsh.inc'; fi
