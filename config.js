@@ -28,7 +28,8 @@ module.exports = {
     'cowsay',
     'fortune',
     'gnebbia/kb/kb',
-    'dust'
+    'dust',
+    'bit' //https://github.com/chriswalz/bit
   ],
   cask: [
     'docker',
