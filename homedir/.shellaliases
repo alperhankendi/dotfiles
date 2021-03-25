@@ -125,11 +125,17 @@ alias krakend-config2dot='/Users/ahankendi/go/src/github.com/devopsfaith/krakend
 
 
 ##github alias
+# git aliases
 alias gc='_git_dbg commit -S -v -s'
 alias gdc='_git_dbg diff --cached'
 alias git='hub'
-alias gpp='_git_dbg push alperhankendi HEAD && hub pull-request --browse'
+function gitnew (){
+  _git_dbg remote add AbdullahAki git@github.com:AbdullahAki/$1.git
+}
+alias gpp='_git_dbg push alperhankendi HEAD hub pull-request --browse'
 alias gpah='_git_dbg push alperhankendi HEAD'
+alias gpall='_git_dbg push alperhankendi --tags && _git_dbg push alperhankendi --all'
+alias gpll='_git_dbg push origin --tags && _git_dbg push origin --all'
 alias glah='_git_dbg pull alperhankendi HEAD'
 alias gfah='_git_dbg fetch alperhankendi'
 alias glom='_git_dbg pull origin master --tags'
@@ -137,4 +143,7 @@ alias gloh='_git_dbg pull origin HEAD --tags'
 alias grom='_git_dbg rebase origin/master'
 alias gpoh='_git_dbg push origin HEAD'
 alias gbv="git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'"
-
+alias ghc='gh repo create'
+alias gs='_git_dbg status'
+alias ga='_git_dbg add'
+unalias grv
