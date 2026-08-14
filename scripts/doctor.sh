@@ -85,15 +85,29 @@ check_bundle() {
 
 check_shell_startup() {
   section "Shell startup"
+  # shellcheck disable=SC2088
   if [ ! -L "$HOME/.zshenv" ]; then
-    # shellcheck disable=SC2088 # literal message text, not a path to expand
     check_fail "~/.zshenv is not linked" "run: dot link zsh"
+    return
+  fi
+  if ! have perl; then
+    check_fail "cannot measure startup: perl is missing" \
+      "measure by hand: time zsh -i -c exit"
     return
   fi
   local start end ms
   start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
   zsh -i -c exit >/dev/null 2>&1
   end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  # An empty or non-numeric reading means the measurement broke, not that the
+  # shell is instant. Never report success on a shell that was never measured.
+  case "$start$end" in
+    '' | *[!0-9]*)
+      check_fail "startup measurement produced no usable reading" \
+        "measure by hand: time zsh -i -c exit"
+      return
+      ;;
+  esac
   ms=$((end - start))
   if [ "$ms" -lt 150 ]; then
     check_ok "interactive zsh starts in ${ms}ms (budget 150ms)"
@@ -105,16 +119,30 @@ check_shell_startup() {
 
 check_local_files() {
   section "Machine-local files"
-  local f
-  for f in "$HOME/.config/git/local" "$HOME/.config/zsh/local.zsh"; do
-    if [ ! -f "$f" ]; then
-      check_fail "$f is missing" "copy the matching .example file and fill it in"
-    elif grep -q 'you@example.com' "$f" 2>/dev/null; then
-      check_fail "$f still holds template values" "edit $f"
-    else
-      check_ok "$f exists"
-    fi
-  done
+
+  # The git example ships a placeholder email, so an unedited copy is
+  # detectable and worth failing on.
+  local gitlocal="$HOME/.config/git/local"
+  if [ ! -f "$gitlocal" ]; then
+    check_fail "$gitlocal is missing" \
+      "copy packages/git/.config/git/local.example to it and fill it in"
+  elif grep -q 'you@example.com' "$gitlocal" 2>/dev/null; then
+    check_fail "$gitlocal still holds template values" "edit $gitlocal"
+  elif ! grep -q '^[[:space:]]*email[[:space:]]*=' "$gitlocal" 2>/dev/null; then
+    check_fail "$gitlocal has no email set" "add an email line under [user]"
+  else
+    check_ok "$gitlocal is filled in"
+  fi
+
+  # The zsh example is entirely commented out, so a verbatim copy is a
+  # legitimate finished state. Only its presence is meaningfully checkable.
+  local zshlocal="$HOME/.config/zsh/local.zsh"
+  if [ -f "$zshlocal" ]; then
+    check_ok "$zshlocal exists"
+  else
+    check_fail "$zshlocal is missing" \
+      "copy packages/zsh/.config/zsh/local.zsh.example to it"
+  fi
 }
 
 main() {

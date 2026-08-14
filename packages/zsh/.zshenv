@@ -11,3 +11,9 @@ export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
 # Where this repository is checked out. Override in local.zsh if it moves.
 export DOTFILES="$HOME/workspace/dotfiles-next"
+
+# Deduplicate PATH entries; zsh keeps the first occurrence of each.
+typeset -U path PATH
+
+# Locally installed tools (uv, pipx) live here. Static assignment, no subprocess.
+path=("$HOME/.local/bin" $path)

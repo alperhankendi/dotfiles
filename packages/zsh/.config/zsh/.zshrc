@@ -1,6 +1,12 @@
 # Interactive shells. Budget: under 150ms (PLAN.md section 1.7).
 # Order matters here — read PLAN.md section 9.5 before rearranging.
 
+# .zprofile handles this for login shells. Non-login interactive shells —
+# `zsh -i -c`, some IDE terminals — need it too. String test, no subprocess.
+if [[ ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
+  path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+fi
+
 # 1. All fpath additions must happen before the single compinit call.
 #    A hardcoded path is used on purpose: `brew --prefix` costs a subprocess.
 fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
