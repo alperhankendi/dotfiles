@@ -85,18 +85,14 @@ cmd_bootstrap() {
   done
 
   if [ "$dry_run" -eq 1 ]; then
-    cat <<'EOF'
-bootstrap would run, in order:
-  1. Xcode Command Line Tools
-  2. Homebrew
-  3. brew bundle (Brewfile, plus Brewfile.gui unless --skip-gui)
-  4. sheldon lock
-  5. dot link (every package)
-  6. tmux plugin managers: TPM and Catppuccin
-  7. mise install
-  8. macOS defaults (unless --skip-macos)
-  9. dot doctor
-EOF
+    printf 'bootstrap would run these steps, in order:\n\n'
+    # Generated from the section() calls in this function, so the preview
+    # cannot drift from what the function actually does.
+    awk '/^cmd_bootstrap\(\)/,/^}/' "$0" \
+      | grep -oE 'section "[A-Za-z][^"]*"' \
+      | sed 's/section "//; s/"$//' \
+      | nl -w3 -s'. ' | sed 's/^/  /'
+    printf '\nNothing has been done. Run without --dry-run to proceed.\n'
     return 0
   fi
 
@@ -183,10 +179,19 @@ EOF
   fi
 
   section "Doctor"
-  bash "$DOT_ROOT/scripts/doctor.sh" || true
+  local doctor_status=0
+  bash "$DOT_ROOT/scripts/doctor.sh" || doctor_status=$?
 
   printf '\n'
-  info "bootstrap complete — open a new terminal"
+  if [ "$doctor_status" -eq 0 ]; then
+    info "bootstrap complete — open a new terminal"
+  else
+    warn "bootstrap finished, but doctor reports items above that need you."
+    warn "On a fresh machine this is expected: the two machine-local files were"
+    warn "created from templates and still hold placeholder values."
+    warn "Fill in ~/.config/git/local and ~/.config/zsh/local.zsh, then: dot doctor"
+  fi
+  return "$doctor_status"
 }
 
 # bootstrap_local_file <example> <destination>
@@ -224,11 +229,17 @@ cmd_update() {
   nvim --headless "+Lazy! sync" +qa
 
   section "Doctor"
-  bash "$DOT_ROOT/scripts/doctor.sh" || true
+  local doctor_status=0
+  bash "$DOT_ROOT/scripts/doctor.sh" || doctor_status=$?
 
   printf '\n'
-  info "update complete — review and commit the lock files:"
+  if [ "$doctor_status" -eq 0 ]; then
+    info "update complete — review and commit the lock files:"
+  else
+    warn "update finished, but doctor reports items above that need you."
+  fi
   printf '  packages/nvim/.config/nvim/lazy-lock.json\n'
+  return "$doctor_status"
 }
 
 main "$@"

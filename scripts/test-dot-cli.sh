@@ -123,4 +123,16 @@ assert_stdout_contains "Xcode" "bootstrap --dry-run lists its steps" \
   "$DOT" bootstrap --dry-run
 assert_exit 1 "bootstrap rejects unknown flags" "$DOT" bootstrap --nonsense
 
+# Same failure mode as the macos dry-run: a section added to cmd_bootstrap
+# without the preview knowing would silently under-report what the installer
+# does. Pin them together.
+boot_listed="$("$DOT" bootstrap --dry-run | grep -cE '^[[:space:]]+[0-9]+\. ')"
+boot_actual="$(awk '/^cmd_bootstrap\(\)/,/^}/' "$ROOT/bin/dot" | grep -cE 'section "[A-Za-z][^"]*"')"
+if [ "$boot_listed" = "$boot_actual" ]; then
+  printf '  ok   bootstrap --dry-run lists all %s sections\n' "$boot_actual"
+else
+  printf '  FAIL bootstrap --dry-run lists %s sections, cmd_bootstrap runs %s\n' "$boot_listed" "$boot_actual"
+  status=1
+fi
+
 exit "$status"
