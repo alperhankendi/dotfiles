@@ -958,7 +958,7 @@ Expected: `✓ Homebrew is installed` and `✓ every formula in homebrew/Brewfil
 
 ```bash
 shellcheck bin/dot scripts/doctor.sh
-git add homebrew/Brewfile homebrew/Brewfile.gui homebrew/Brewfile.lock.json bin/dot scripts/doctor.sh
+git add homebrew/Brewfile homebrew/Brewfile.gui bin/dot scripts/doctor.sh .gitignore
 git commit -m "feat: add Homebrew bundles and the dot brew command"
 ```
 
@@ -2357,8 +2357,8 @@ Run `dot update` in `$DOTFILES`.
 
 Then:
 1. Run `dot doctor` and confirm nothing regressed.
-2. Show me `git status` and `git diff` for the lock files
-   (`homebrew/Brewfile.lock.json`, `packages/nvim/.config/nvim/lazy-lock.json`).
+2. Show me `git status` and `git diff` for the lock files. Homebrew has no
+   lockfile, so the only one is `packages/nvim/.config/nvim/lazy-lock.json`.
 3. Stage only those lock files. Do not commit.
 4. If any tool moved to a new major version, tell me which and what changed.
 ```
@@ -2804,7 +2804,6 @@ cmd_update() {
 
   printf '\n'
   info "update complete — review and commit the lock files:"
-  printf '  homebrew/Brewfile.lock.json\n'
   printf '  packages/nvim/.config/nvim/lazy-lock.json\n'
 }
 ```

@@ -26,7 +26,7 @@ These arbitrate every later decision. When a choice is close, check it against t
 1. **Declarative over imperative.** Configuration is a TOML/INI/conf file, not a chain of `if [[ $? != 0 ]]`. Adding a tool should mean writing three lines of text, not reading a script.
 2. **No binaries in the repo.** Fonts, themes, icons, plists come from the package manager. The single exception is text-format theme files (§6.9).
 3. **One tool, one file.** If a tool's settings are scattered across two places, the design is wrong.
-4. **Reproducibility.** Versions are pinned: `Brewfile.lock.json`, `lazy-lock.json`, `mise` versions, tmux plugin tags.
+4. **Reproducibility, honestly scoped.** Pin what can be pinned: `lazy-lock.json` for Neovim plugins, explicit versions in `mise` for language runtimes, a git tag for the Catppuccin tmux theme. Homebrew is the deliberate exception — as of Homebrew 6 there is no `Brewfile.lock.json` and no lockfile concept at all, so the Brewfile guarantees the same *set* of tools on every machine, at whatever version Homebrew currently ships. For a personal CLI toolchain that is the right trade; anything stronger would mean pinning formula revisions by hand and re-pinning them forever.
 5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. Two things genuinely need a person, and both are asked **once, at the very start**, never mid-run: the administrator password (Homebrew must create `/opt/homebrew`, and the macOS defaults need root), and the confirmation before those defaults are applied. `--yes` silences the confirmation, `--skip-macos` skips the defaults entirely, and neither prompt appears when stdin is not a TTY, so CI is unaffected. Everything after that first prompt runs to completion without attention.
 6. **Idempotent.** A second run produces the same result as the first. Never write into tracked files.
 7. **Fast shell startup.** The Ghostty quick terminal is bound to a hotkey; dozens of shells open per day. Target: `time zsh -i -c exit` under **150 ms**. No network calls, no version checks, no banner at startup.
@@ -96,8 +96,7 @@ dotfiles-next/
 │
 ├── homebrew/
 │   ├── Brewfile               # core plus CLI (headless-safe)
-│   ├── Brewfile.gui           # casks: ghostty, fonts, GUI apps
-│   └── Brewfile.lock.json     # committed (principle 4)
+│   └── Brewfile.gui           # casks: ghostty, fonts, GUI apps
 │
 ├── macos/
 │   └── defaults.sh            # ~25 settings, every line commented (§6.12)
@@ -191,7 +190,7 @@ brew "git"; brew "gh"; brew "lazygit"; brew "neovim"; brew "mise"; brew "trash"
 
 **`homebrew/Brewfile.gui`** — `ghostty`, `font-anka-coder`, `font-symbols-only-nerd-font`, and whatever GUI apps get added over time. Skipped in CI and headless installs via `--skip-gui`.
 
-`Brewfile.lock.json` is committed (principle 4). The `mas`, `vscode`, `go`, and `npm` blocks are **not used**.
+There is no `Brewfile.lock.json` — Homebrew 6 removed the lockfile concept entirely, so the Brewfile pins the tool set rather than the versions (principle 4). The `mas`, `vscode`, `go`, and `npm` blocks are **not used**.
 
 Adding a tool → §7.
 
