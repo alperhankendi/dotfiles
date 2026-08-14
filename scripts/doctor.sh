@@ -145,12 +145,26 @@ check_local_files() {
   fi
 }
 
+check_sheldon() {
+  section "sheldon"
+  if ! have sheldon; then
+    check_fail "sheldon is missing" "run: dot brew"
+    return
+  fi
+  if sheldon source >/dev/null 2>&1; then
+    check_ok "sheldon source runs cleanly"
+  else
+    check_fail "sheldon source fails" "check ~/.config/sheldon/plugins.toml"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
   check_bundle
   check_shell_startup
   check_local_files
+  check_sheldon
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

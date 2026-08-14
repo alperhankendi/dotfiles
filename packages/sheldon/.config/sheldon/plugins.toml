@@ -1,0 +1,37 @@
+# Plugin manager and, more importantly, the single ordering authority for
+# shell initialisation. Read PLAN.md section 6.3 before reordering anything.
+
+shell = "zsh"
+
+[templates]
+# Loads a plugin lazily through zsh-defer instead of blocking startup.
+defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
+
+# zsh-defer must be available before anything that uses the defer template.
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
+
+# fzf-tab has to come after compinit, which .zshrc already guarantees.
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+apply = ["defer"]
+
+# Initialisation for tools installed as Homebrew binaries rather than as
+# plugins. They live here so that one file owns the whole ordering problem.
+# starship is deliberately not deferred: a prompt that arrives late is useless.
+[plugins.tooling]
+inline = '''
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh --cmd cd)"
+eval "$(mise activate zsh)"
+source <(fzf --zsh)
+eval "$(atuin init zsh --disable-up-arrow)"
+'''
+
+# Syntax highlighting must always be last.
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+apply = ["defer"]

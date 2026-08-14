@@ -6,6 +6,13 @@
 DOT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 export DOT_ROOT
 
+# `dot` must work the same from any shell, including ones that never sourced
+# .zprofile — scripts, CI, cron. String test, no subprocess.
+case ":$PATH:" in
+  *":/opt/homebrew/bin:"*) ;;
+  *) PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"; export PATH ;;
+esac
+
 # Colour is opt-out via NO_COLOR and automatically disabled when stdout
 # is not a terminal, so piped output stays clean.
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
