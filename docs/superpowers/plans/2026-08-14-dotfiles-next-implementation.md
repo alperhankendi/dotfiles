@@ -2673,6 +2673,18 @@ EOF
     return 0
   fi
 
+  # Installing Homebrew needs root to create /opt/homebrew, and applying the
+  # macOS defaults needs it too. Ask once, here, so the rest of the run is
+  # uninterrupted rather than stalling on a password prompt ten minutes in.
+  # Skipped when there is no TTY, so CI still works.
+  if [ -t 0 ] && ! have brew; then
+    section "Administrator access"
+    info "Homebrew needs to create /opt/homebrew — asking for your password once"
+    sudo -v
+    # Refresh the credential in the background so it does not expire mid-run.
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+  fi
+
   section "Xcode Command Line Tools"
   if xcode-select -p >/dev/null 2>&1; then
     info "already installed"
@@ -2686,7 +2698,9 @@ EOF
   if have brew; then
     info "already installed"
   else
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # NONINTERACTIVE stops the installer waiting for a RETURN keypress.
+    NONINTERACTIVE=1 /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
   eval "$(/opt/homebrew/bin/brew shellenv)"
 

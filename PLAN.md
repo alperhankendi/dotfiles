@@ -27,7 +27,7 @@ These arbitrate every later decision. When a choice is close, check it against t
 2. **No binaries in the repo.** Fonts, themes, icons, plists come from the package manager. The single exception is text-format theme files (§6.9).
 3. **One tool, one file.** If a tool's settings are scattered across two places, the design is wrong.
 4. **Reproducibility.** Versions are pinned: `Brewfile.lock.json`, `lazy-lock.json`, `mise` versions, tmux plugin tags.
-5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. The only exception is macOS system settings — that step asks, and `--yes` silences it.
+5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. Two things genuinely need a person, and both are asked **once, at the very start**, never mid-run: the administrator password (Homebrew must create `/opt/homebrew`, and the macOS defaults need root), and the confirmation before those defaults are applied. `--yes` silences the confirmation, `--skip-macos` skips the defaults entirely, and neither prompt appears when stdin is not a TTY, so CI is unaffected. Everything after that first prompt runs to completion without attention.
 6. **Idempotent.** A second run produces the same result as the first. Never write into tracked files.
 7. **Fast shell startup.** The Ghostty quick terminal is bound to a hotkey; dozens of shells open per day. Target: `time zsh -i -c exit` under **150 ms**. No network calls, no version checks, no banner at startup.
 8. **Sources, not derived files.** If a file can be hand-edited, it is a source and must not be generator output. (This principle killed the `tools.toml` manifest idea — §3.)
