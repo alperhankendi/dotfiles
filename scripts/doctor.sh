@@ -413,15 +413,23 @@ check_neovim() {
     check_fail "the nvim config is not linked" "run: dot link nvim"
     return
   fi
-  if nvim --headless "+qa" >/dev/null 2>&1; then
+  # `nvim --headless +qa` exits 0 even when init.lua raises — the exit status
+  # is useless here. Lua errors do reach stderr, so key on that instead.
+  local nvim_err
+  nvim_err="$(nvim --headless "+qa" 2>&1 >/dev/null)"
+  if [ -z "$nvim_err" ]; then
     check_ok "nvim starts without errors"
   else
-    check_fail "nvim reports startup errors" "run: nvim --headless +qa"
+    check_fail "nvim reports startup errors: $(printf '%s' "$nvim_err" | head -1)" \
+      "run: nvim --headless +qa"
   fi
-  if [ -f "$DOT_ROOT/packages/nvim/.config/nvim/lazy-lock.json" ]; then
-    check_ok "lazy-lock.json is committed"
+  local lock="$DOT_ROOT/packages/nvim/.config/nvim/lazy-lock.json"
+  local pins=0
+  [ -f "$lock" ] && pins="$(grep -c '"commit"' "$lock")"
+  if [ "$pins" -gt 0 ]; then
+    check_ok "lazy-lock.json pins $pins plugin(s)"
   else
-    check_warn "lazy-lock.json is missing" \
+    check_warn "lazy-lock.json pins nothing" \
       "run nvim once, then commit packages/nvim/.config/nvim/lazy-lock.json"
   fi
 }
