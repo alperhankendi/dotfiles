@@ -100,4 +100,6 @@ case "$fail_output" in
     status=1 ;;
 esac
 
+assert_exit 1 "dot brew rejects an unknown option" "$DOT" brew --nonsense
+
 exit "$status"

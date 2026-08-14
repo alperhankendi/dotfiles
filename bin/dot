@@ -43,6 +43,11 @@ main() {
       ;;
     brew)
       have brew || die "Homebrew is missing — run: dot bootstrap"
+      # Validate before installing, so a typo cannot half-install the machine.
+      case "${1:-}" in
+        "" | --gui) ;;
+        *) die "unknown option for brew: $1 (expected --gui)" ;;
+      esac
       brew bundle --file="$DOT_ROOT/homebrew/Brewfile"
       if [ "${1:-}" = "--gui" ]; then
         brew bundle --file="$DOT_ROOT/homebrew/Brewfile.gui"
