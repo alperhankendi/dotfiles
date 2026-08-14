@@ -70,9 +70,23 @@ check_symlinks() {
   done
 }
 
+check_bundle() {
+  section "Homebrew bundle"
+  if ! have brew; then
+    check_fail "cannot check the bundle without Homebrew" "run: dot bootstrap"
+    return
+  fi
+  if brew bundle check --file="$DOT_ROOT/homebrew/Brewfile" >/dev/null 2>&1; then
+    check_ok "every formula in homebrew/Brewfile is installed"
+  else
+    check_fail "some formulae are missing" "run: dot brew"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
+  check_bundle
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

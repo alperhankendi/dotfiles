@@ -41,7 +41,14 @@ main() {
     unlink)
       link_packages unlink "$@"
       ;;
-    brew | macos | update | bootstrap)
+    brew)
+      have brew || die "Homebrew is missing — run: dot bootstrap"
+      brew bundle --file="$DOT_ROOT/homebrew/Brewfile"
+      if [ "${1:-}" = "--gui" ]; then
+        brew bundle --file="$DOT_ROOT/homebrew/Brewfile.gui"
+      fi
+      ;;
+    macos | update | bootstrap)
       info "$cmd: not implemented yet"
       ;;
     *)

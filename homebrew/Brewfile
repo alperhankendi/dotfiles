@@ -1,0 +1,38 @@
+# Core command-line environment. Headless-safe: no casks here, so this file
+# can be installed in CI and on servers. GUI applications live in Brewfile.gui.
+
+# Engine
+brew "stow"
+brew "shellcheck"
+
+# Shell
+brew "zsh"
+brew "sheldon"
+brew "starship"
+brew "tmux"
+
+# Modern replacements for the classics
+brew "eza"        # ls
+brew "bat"        # cat
+brew "git-delta"  # diff
+brew "zoxide"     # cd
+brew "fzf"        # fuzzy finder
+brew "atuin"      # Ctrl+R
+brew "ripgrep"    # grep
+brew "fd"         # find
+brew "dust"       # du
+brew "duf"        # df
+brew "procs"      # ps
+brew "btop"       # top
+brew "tealdeer"   # man pages, practical examples
+brew "yazi"       # terminal file manager
+brew "jq"
+brew "yq"
+
+# Git and development
+brew "git"
+brew "gh"
+brew "lazygit"
+brew "neovim"
+brew "mise"
+brew "trash"

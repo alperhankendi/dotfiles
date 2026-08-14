@@ -14,3 +14,6 @@ packages/ghostty/.config/ghostty/local.conf
 
 # Build-process scratch space
 .superpowers/
+
+# Claude Code's per-project local state for this machine
+.claude/settings.local.json

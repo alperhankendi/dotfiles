@@ -1,0 +1,9 @@
+# GUI applications and fonts. Skipped by `dot bootstrap --skip-gui` and
+# never installed in CI.
+
+cask "ghostty"
+
+# Anka/Coder is not a Nerd Font, so the symbols-only font provides the
+# glyph fallback. See PLAN.md section 9.1.
+cask "font-anka-coder"
+cask "font-symbols-only-nerd-font"
