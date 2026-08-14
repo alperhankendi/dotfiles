@@ -20,7 +20,10 @@ jobs:
       - name: shellcheck
         run: |
           shopt -s nullglob
-          files=(bin/dot bootstrap.sh scripts/*.sh macos/*.sh)
+          files=()
+          for f in bin/dot bootstrap.sh scripts/*.sh macos/*.sh; do
+            [ -f "$f" ] && files+=("$f")
+          done
           if [ ${#files[@]} -eq 0 ]; then
             echo "no shell files to check yet"
             exit 0
