@@ -53,7 +53,10 @@ main() {
         brew bundle --file="$DOT_ROOT/homebrew/Brewfile.gui"
       fi
       ;;
-    macos | update | bootstrap)
+    macos)
+      bash "$DOT_ROOT/macos/defaults.sh" "$@"
+      ;;
+    update | bootstrap)
       info "$cmd: not implemented yet"
       ;;
     *)

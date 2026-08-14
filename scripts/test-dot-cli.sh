@@ -102,4 +102,8 @@ esac
 
 assert_exit 1 "dot brew rejects an unknown option" "$DOT" brew --nonsense
 
+assert_exit 0 "dot macos --help exits 0" bash "$ROOT/macos/defaults.sh" --help
+assert_stdout_contains "would change" "defaults.sh --dry-run explains itself" \
+  bash "$ROOT/macos/defaults.sh" --dry-run
+
 exit "$status"
