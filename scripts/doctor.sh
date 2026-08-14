@@ -157,18 +157,30 @@ check_sheldon() {
     return
   fi
   # Exit status alone is not enough: a plugins.toml that parses but wires
-  # nothing still exits 0. Confirm the emitted script really initialises the
-  # tools the shell layer depends on.
+  # nothing still exits 0. Match the distinctive strings the emitted script
+  # must contain — bare tool names are ambiguous, since `fzf` is a substring
+  # of `fzf-tab`. Entries contain spaces, so they are read as whole lines.
   local want missing=""
-  for want in zsh-defer fzf-tab zsh-autosuggestions zsh-syntax-highlighting \
-              starship zoxide mise fzf atuin; do
+  while IFS= read -r want; do
+    [ -n "$want" ] || continue
     case "$src" in
       *"$want"*) ;;
-      *) missing="$missing $want" ;;
+      *) missing="$missing, $want" ;;
     esac
-  done
+  done <<'WANTS'
+zsh-defer
+fzf-tab
+zsh-autosuggestions
+zsh-syntax-highlighting
+starship init
+zoxide init
+mise activate
+fzf --zsh
+atuin init
+WANTS
+
   if [ -n "$missing" ]; then
-    check_fail "sheldon source omits:$missing" \
+    check_fail "sheldon source omits:${missing#,}" \
       "check the plugin list and the [plugins.tooling] block in ~/.config/sheldon/plugins.toml"
   else
     check_ok "sheldon source wires every expected tool"
