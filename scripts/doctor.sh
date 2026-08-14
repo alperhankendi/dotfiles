@@ -299,7 +299,7 @@ check_tmux() {
     check_fail "tmux is missing" "run: dot brew"
     return
   fi
-  if [ -d "$HOME/.config/tmux/plugins/tpm" ]; then
+  if [ -x "$HOME/.config/tmux/plugins/tpm/tpm" ]; then
     check_ok "TPM is installed"
   else
     check_fail "TPM is missing" \
@@ -310,10 +310,22 @@ check_tmux() {
   else
     check_fail "the Catppuccin theme is missing" "run: dot bootstrap"
   fi
-  if tmux -f "$HOME/.config/tmux/tmux.conf" start-server \; kill-server 2>/dev/null; then
+  # `tmux -f conf start-server \; kill-server` exits 0 even for a config full
+  # of errors, so it proves nothing. Sourcing into a throwaway server on its
+  # own socket does surface them, and `-L` keeps it from touching a real
+  # session.
+  local sock="dot-doctor-$$" conf_out conf_rc
+  conf_out="$(
+    tmux -L "$sock" -f /dev/null new-session -d -s probe >/dev/null 2>&1
+    tmux -L "$sock" source-file "$HOME/.config/tmux/tmux.conf" 2>&1
+  )"
+  conf_rc=$?
+  tmux -L "$sock" kill-server >/dev/null 2>&1
+  if [ "$conf_rc" -eq 0 ]; then
     check_ok "tmux.conf loads without errors"
   else
-    check_fail "tmux.conf has errors" "run: tmux -f ~/.config/tmux/tmux.conf start-server"
+    check_fail "tmux.conf has errors: $conf_out" \
+      "reproduce with: tmux -L probe -f /dev/null new-session -d \\; source-file ~/.config/tmux/tmux.conf"
   fi
 }
 
