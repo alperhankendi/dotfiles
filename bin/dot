@@ -56,8 +56,11 @@ main() {
     macos)
       bash "$DOT_ROOT/macos/defaults.sh" "$@"
       ;;
-    update | bootstrap)
-      info "$cmd: not implemented yet"
+    bootstrap)
+      cmd_bootstrap "$@"
+      ;;
+    update)
+      cmd_update
       ;;
     *)
       err "unknown command: $cmd"
@@ -65,6 +68,167 @@ main() {
       exit 1
       ;;
   esac
+}
+
+cmd_bootstrap() {
+  local assume_yes=0 skip_macos=0 skip_gui=0 dry_run=0
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --yes) assume_yes=1 ;;
+      --skip-macos) skip_macos=1 ;;
+      --skip-gui) skip_gui=1 ;;
+      --dry-run) dry_run=1 ;;
+      *) err "unknown bootstrap option: $1"; exit 1 ;;
+    esac
+    shift
+  done
+
+  if [ "$dry_run" -eq 1 ]; then
+    cat <<'EOF'
+bootstrap would run, in order:
+  1. Xcode Command Line Tools
+  2. Homebrew
+  3. brew bundle (Brewfile, plus Brewfile.gui unless --skip-gui)
+  4. sheldon lock
+  5. dot link (every package)
+  6. tmux plugin managers: TPM and Catppuccin
+  7. mise install
+  8. macOS defaults (unless --skip-macos)
+  9. dot doctor
+EOF
+    return 0
+  fi
+
+  # Installing Homebrew needs root to create /opt/homebrew. Ask once, here,
+  # so the rest of the run is uninterrupted rather than stalling on a
+  # password prompt ten minutes in. Skipped when there is no TTY, so CI
+  # still works.
+  if [ -t 0 ] && ! have brew; then
+    section "Administrator access"
+    info "Homebrew needs to create /opt/homebrew — asking for your password once"
+    sudo -v
+    # Refresh the credential in the background so it does not expire mid-run.
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+  fi
+
+  section "Xcode Command Line Tools"
+  if xcode-select -p >/dev/null 2>&1; then
+    info "already installed"
+  else
+    info "installing — follow the GUI prompt, then re-run this command"
+    xcode-select --install
+    exit 0
+  fi
+
+  section "Homebrew"
+  if have brew; then
+    info "already installed"
+  else
+    # NONINTERACTIVE stops the installer waiting for a RETURN keypress.
+    NONINTERACTIVE=1 /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+  section "Homebrew packages"
+  brew bundle --file="$DOT_ROOT/homebrew/Brewfile"
+  if [ "$skip_gui" -eq 0 ]; then
+    brew bundle --file="$DOT_ROOT/homebrew/Brewfile.gui"
+  else
+    info "skipping GUI packages"
+  fi
+
+  section "Shell plugins"
+  link_packages link sheldon
+  sheldon lock
+
+  section "Dotfiles"
+  link_packages link
+
+  section "Machine-local files"
+  bootstrap_local_file "$DOT_ROOT/packages/git/.config/git/local.example" \
+    "$HOME/.config/git/local"
+  bootstrap_local_file "$DOT_ROOT/packages/zsh/.config/zsh/local.zsh.example" \
+    "$HOME/.config/zsh/local.zsh"
+
+  section "tmux plugins"
+  if [ ! -d "$HOME/.config/tmux/plugins/tpm" ]; then
+    git clone --depth 1 https://github.com/tmux-plugins/tpm \
+      "$HOME/.config/tmux/plugins/tpm"
+  fi
+  if [ ! -d "$HOME/.config/tmux/plugins/catppuccin/tmux" ]; then
+    mkdir -p "$HOME/.config/tmux/plugins/catppuccin"
+    git clone --depth 1 -b v2.3.0 https://github.com/catppuccin/tmux.git \
+      "$HOME/.config/tmux/plugins/catppuccin/tmux"
+  fi
+  "$HOME/.config/tmux/plugins/tpm/bin/install_plugins" || \
+    warn "tmux plugin install reported a problem; run prefix+I inside tmux"
+
+  section "Runtimes"
+  mise install
+
+  section "Neovim plugins"
+  nvim --headless "+Lazy! sync" +qa || warn "nvim plugin sync reported a problem"
+
+  if [ "$skip_macos" -eq 0 ]; then
+    section "macOS defaults"
+    if [ "$assume_yes" -eq 1 ]; then
+      bash "$DOT_ROOT/macos/defaults.sh" --yes
+    else
+      bash "$DOT_ROOT/macos/defaults.sh"
+    fi
+  else
+    info "skipping macOS defaults"
+  fi
+
+  section "Doctor"
+  bash "$DOT_ROOT/scripts/doctor.sh" || true
+
+  printf '\n'
+  info "bootstrap complete — open a new terminal"
+}
+
+# bootstrap_local_file <example> <destination>
+# Copies the template only when the destination does not exist, so the
+# install stays unattended and never overwrites real secrets.
+bootstrap_local_file() {
+  local example="$1" dest="$2"
+  if [ -f "$dest" ]; then
+    info "$dest already exists"
+    return
+  fi
+  mkdir -p "$(dirname "$dest")"
+  cp "$example" "$dest"
+  warn "created $dest from the template — fill it in"
+}
+
+cmd_update() {
+  section "Homebrew"
+  brew update
+  brew upgrade
+  brew bundle --file="$DOT_ROOT/homebrew/Brewfile"
+
+  section "Shell plugins"
+  sheldon lock --update
+
+  section "Runtimes"
+  mise upgrade
+
+  section "tmux plugins"
+  if [ -x "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" ]; then
+    "$HOME/.config/tmux/plugins/tpm/bin/update_plugins" all
+  fi
+
+  section "Neovim plugins"
+  nvim --headless "+Lazy! sync" +qa
+
+  section "Doctor"
+  bash "$DOT_ROOT/scripts/doctor.sh" || true
+
+  printf '\n'
+  info "update complete — review and commit the lock files:"
+  printf '  packages/nvim/.config/nvim/lazy-lock.json\n'
 }
 
 main "$@"
