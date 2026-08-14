@@ -1,0 +1,54 @@
+# Ghostty. Plain key = value; see PLAN.md section 6.4.
+# Validate any change with: ghostty +validate-config
+
+# ── Appearance ────────────────────────────────────────────────────────
+# The built-in theme file is named "Catppuccin Mocha" (with spaces/caps);
+# "catppuccin-mocha" is rejected by +validate-config.
+theme = Catppuccin Mocha
+font-family = Anka/Coder
+# Anka/Coder is not a Nerd Font, so symbols come from a second family.
+font-family = Symbols Nerd Font Mono
+font-size = 14
+# Approximates the Condensed variant, which Homebrew does not carry.
+adjust-cell-width = -3%
+cursor-style = block
+cursor-style-blink = false
+mouse-hide-while-typing = true
+window-padding-x = 8
+window-padding-y = 6
+background-opacity = 0.97
+background-blur = 20
+
+# ── Shell and TUI behaviour ───────────────────────────────────────────
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
+# Lets alt+b / alt+f jump by word at the prompt.
+macos-option-as-alt = true
+# Stops a running agent from being killed by an accidental cmd+w.
+confirm-close-surface = true
+# 100 MB, sized for long agent output.
+scrollback-limit = 104857600
+clipboard-paste-protection = true
+
+# ── Quick terminal: the drop-down agent session ───────────────────────
+quick-terminal-position = top
+quick-terminal-size = 40%
+# Must not disappear when focus moves elsewhere while an agent is running.
+quick-terminal-autohide = false
+
+# ── Notifications ─────────────────────────────────────────────────────
+notify-on-command-finish = unfocused
+notify-on-command-finish-after = 30s
+
+# ── Keybinds: only what tmux cannot do ────────────────────────────────
+# Splits live in tmux, so no split bindings are defined here.
+# The physical key is named "backquote", not "grave" (see ghostty(5)).
+keybind = global:cmd+backquote=toggle_quick_terminal
+# Writes the whole pane to a file and pastes the path into the prompt.
+keybind = cmd+shift+s=write_scrollback_file:paste
+keybind = cmd+shift+r=reload_config
+# Multi-line input in Claude Code.
+keybind = shift+enter=text:\n
+
+# ── Machine-local overrides (gitignored) ──────────────────────────────
+config-file = ?local.conf

@@ -257,6 +257,36 @@ WANTS
   fi
 }
 
+check_ghostty() {
+  section "Ghostty"
+  local ghostty="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+  if have ghostty; then
+    ghostty="$(command -v ghostty)"
+  elif [ ! -x "$ghostty" ]; then
+    check_fail "Ghostty is not installed" "run: dot brew --gui"
+    return
+  fi
+
+  if "$ghostty" +validate-config >/dev/null 2>&1; then
+    check_ok "ghostty +validate-config is clean"
+  else
+    check_fail "the Ghostty config has errors" "run: $ghostty +validate-config"
+  fi
+
+  if "$ghostty" +list-fonts 2>/dev/null | grep -qi 'anka'; then
+    check_ok "the Anka/Coder font is installed"
+  else
+    check_fail "the Anka/Coder font is missing" "run: brew install --cask font-anka-coder"
+  fi
+
+  if "$ghostty" +list-fonts 2>/dev/null | grep -qi 'symbols nerd font'; then
+    check_ok "the Nerd Font symbol fallback is installed"
+  else
+    check_warn "the Nerd Font symbol fallback is missing" \
+      "run: brew install --cask font-symbols-only-nerd-font"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
@@ -266,6 +296,7 @@ main() {
   check_local_files
   check_sheldon
   check_starship
+  check_ghostty
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"
