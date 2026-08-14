@@ -414,9 +414,12 @@ check_neovim() {
     return
   fi
   # `nvim --headless +qa` exits 0 even when init.lua raises — the exit status
-  # is useless here. Lua errors do reach stderr, so key on that instead.
+  # is useless here. Lua errors do reach stderr, so key on that instead. Not
+  # every stderr line is a failure though: harmless deprecation notices and
+  # treesitter compile messages also land there, so only match lines that
+  # look like an actual Neovim error.
   local nvim_err
-  nvim_err="$(nvim --headless "+qa" 2>&1 >/dev/null)"
+  nvim_err="$(nvim --headless "+qa" 2>&1 >/dev/null | grep -E '^E[0-9]+:|Error' | head -1)"
   if [ -z "$nvim_err" ]; then
     check_ok "nvim starts without errors"
   else
@@ -434,6 +437,46 @@ check_neovim() {
   fi
 }
 
+check_claude() {
+  section "Claude Code"
+
+  # The folding trap: if ~/.claude is itself a symlink, Claude Code writes
+  # its session state into this repository. See PLAN.md section 9.4.
+  # shellcheck disable=SC2088
+  if [ -L "$HOME/.claude" ]; then
+    check_fail "~/.claude is a symlink, not a directory" \
+      "run: rm ~/.claude && dot link claude   (dot link uses --no-folding)"
+  elif [ -d "$HOME/.claude" ]; then
+    check_ok "~/.claude is a real directory"
+  else
+    check_fail "~/.claude does not exist" "run: dot link claude"
+  fi
+
+  # shellcheck disable=SC2088
+  if [ -L "$HOME/.claude/settings.json" ]; then
+    if grep -q 'starship statusline claude-code' "$HOME/.claude/settings.json"; then
+      check_ok "the Claude status line is wired to starship"
+    else
+      check_fail "settings.json does not reference the starship status line" \
+        "check packages/claude/.claude/settings.json"
+    fi
+  else
+    check_fail "~/.claude/settings.json is not linked" "run: dot link claude"
+  fi
+
+  # Runtime state must never end up inside the repository.
+  local leaked
+  leaked="$(find "$DOT_ROOT/packages/claude/.claude" \
+    \( -name 'sessions' -o -name 'projects' -o -name 'history.jsonl' \) \
+    -print -quit 2>/dev/null)"
+  if [ -n "$leaked" ]; then
+    check_fail "Claude runtime state leaked into the repo: $leaked" \
+      "delete it and confirm dot link uses --no-folding"
+  else
+    check_ok "no Claude runtime state in the repo"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
@@ -447,6 +490,7 @@ main() {
   check_tmux
   check_cli_tools
   check_neovim
+  check_claude
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

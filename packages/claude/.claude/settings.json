@@ -1,0 +1,13 @@
+{
+  "theme": "dark",
+  "tui": "fullscreen",
+  "effortLevel": "high",
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "sonarqube@claude-plugins-official": true
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "starship statusline claude-code"
+  }
+}

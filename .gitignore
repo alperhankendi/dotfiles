@@ -17,3 +17,15 @@ packages/ghostty/.config/ghostty/local.conf
 
 # Claude Code's per-project local state for this machine
 .claude/settings.local.json
+
+# Claude Code runtime state must never enter the repository (PLAN.md 6.11)
+packages/claude/.claude/projects/
+packages/claude/.claude/sessions/
+packages/claude/.claude/shell-snapshots/
+packages/claude/.claude/plugins/
+packages/claude/.claude/telemetry/
+packages/claude/.claude/ide/
+packages/claude/.claude/backups/
+packages/claude/.claude/cache/
+packages/claude/.claude/history.jsonl
+packages/claude/.claude/settings.local.json
