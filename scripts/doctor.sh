@@ -33,8 +33,46 @@ check_homebrew() {
   fi
 }
 
+check_symlinks() {
+  section "Symlinks"
+  local pkg pkg_dir src rel target linked missing broken
+  for pkg in $(dot_packages); do
+    pkg_dir="$DOT_ROOT/packages/$pkg"
+    linked=0
+    missing=0
+    broken=0
+    while IFS= read -r src; do
+      rel="${src#"$pkg_dir"/}"
+      case "$rel" in
+        *.example) continue ;;
+      esac
+      target="$HOME/$rel"
+      if [ -L "$target" ]; then
+        if [ -e "$target" ]; then
+          linked=$((linked + 1))
+        else
+          broken=$((broken + 1))
+        fi
+      else
+        missing=$((missing + 1))
+      fi
+    done < <(find "$pkg_dir" -type f)
+
+    if [ "$broken" -gt 0 ]; then
+      check_fail "$pkg has $broken broken symlink(s)" "run: dot link $pkg"
+    elif [ "$missing" -gt 0 ]; then
+      check_fail "$pkg is not fully linked ($missing file(s) missing)" "run: dot link $pkg"
+    elif [ "$linked" -eq 0 ]; then
+      check_warn "$pkg contains no linkable files" "add configuration under packages/$pkg"
+    else
+      check_ok "$pkg is linked ($linked file(s))"
+    fi
+  done
+}
+
 main() {
   check_homebrew
+  check_symlinks
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

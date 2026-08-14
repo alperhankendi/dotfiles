@@ -6,6 +6,9 @@ set -euo pipefail
 # shellcheck source=scripts/lib.sh
 . "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/scripts/lib.sh"
 
+# shellcheck source=scripts/link.sh
+. "$DOT_ROOT/scripts/link.sh"
+
 usage() {
   cat <<'EOF'
 Usage: dot <command> [options]
@@ -32,7 +35,13 @@ main() {
     doctor)
       bash "$DOT_ROOT/scripts/doctor.sh"
       ;;
-    link | unlink | brew | macos | update | bootstrap)
+    link)
+      link_packages link "$@"
+      ;;
+    unlink)
+      link_packages unlink "$@"
+      ;;
+    brew | macos | update | bootstrap)
       info "$cmd: not implemented yet"
       ;;
     *)

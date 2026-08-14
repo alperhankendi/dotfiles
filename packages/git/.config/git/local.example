@@ -1,0 +1,4 @@
+# Copy to ~/.config/git/local and fill in. This file is never committed.
+[user]
+	name = Your Name
+	email = you@example.com

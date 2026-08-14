@@ -20,6 +20,9 @@ jobs:
       - name: dot CLI tests
         run: bash scripts/test-dot-cli.sh
 
+      - name: dot link tests
+        run: bash scripts/test-link.sh
+
       - name: shellcheck
         run: |
           shopt -s nullglob

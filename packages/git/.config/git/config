@@ -1,0 +1,43 @@
+# Git configuration. Personal identity lives in ~/.config/git/local,
+# which is gitignored — see PLAN.md section 2.15.
+[include]
+	path = ~/.config/git/local
+[include]
+	path = ~/.config/delta/catppuccin.gitconfig
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[rebase]
+	autoStash = true
+
+[fetch]
+	prune = true
+
+[credential]
+	helper = osxkeychain
+
+[core]
+	pager = delta
+	excludesfile = ~/.config/git/ignore
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	features = catppuccin-mocha
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[diff]
+	algorithm = histogram
