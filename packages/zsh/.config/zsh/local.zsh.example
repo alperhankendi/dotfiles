@@ -1,0 +1,8 @@
+# Copy to ~/.config/zsh/local.zsh and edit. Never committed.
+# Sourced last, so anything here overrides the rest of the configuration.
+
+# export ANTHROPIC_API_KEY="..."
+# export GITHUB_TOKEN="..."
+
+# Override the repository location if it is not ~/workspace/dotfiles-next:
+# export DOTFILES="$HOME/code/dotfiles-next"

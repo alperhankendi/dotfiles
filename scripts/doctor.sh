@@ -83,10 +83,46 @@ check_bundle() {
   fi
 }
 
+check_shell_startup() {
+  section "Shell startup"
+  if [ ! -L "$HOME/.zshenv" ]; then
+    # shellcheck disable=SC2088 # literal message text, not a path to expand
+    check_fail "~/.zshenv is not linked" "run: dot link zsh"
+    return
+  fi
+  local start end ms
+  start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  zsh -i -c exit >/dev/null 2>&1
+  end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  ms=$((end - start))
+  if [ "$ms" -lt 150 ]; then
+    check_ok "interactive zsh starts in ${ms}ms (budget 150ms)"
+  else
+    check_warn "interactive zsh starts in ${ms}ms, over the 150ms budget" \
+      "profile with: zsh -i -c 'zmodload zsh/zprof; zprof'"
+  fi
+}
+
+check_local_files() {
+  section "Machine-local files"
+  local f
+  for f in "$HOME/.config/git/local" "$HOME/.config/zsh/local.zsh"; do
+    if [ ! -f "$f" ]; then
+      check_fail "$f is missing" "copy the matching .example file and fill it in"
+    elif grep -q 'you@example.com' "$f" 2>/dev/null; then
+      check_fail "$f still holds template values" "edit $f"
+    else
+      check_ok "$f exists"
+    fi
+  done
+}
+
 main() {
   check_homebrew
   check_symlinks
   check_bundle
+  check_shell_startup
+  check_local_files
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"
