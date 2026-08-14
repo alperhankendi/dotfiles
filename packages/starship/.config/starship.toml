@@ -1,0 +1,175 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$line_break\
+$character"""
+
+right_format = """
+$cmd_duration\
+$nodejs\
+$python\
+$golang\
+$rust\
+$java\
+$swift\
+$kubernetes\
+$time"""
+
+add_newline = true
+command_timeout = 1000
+palette = "catppuccin_mocha"
+
+[directory]
+style = "bold blue"
+truncation_length = 3
+truncation_symbol = "…/"
+format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = " "
+
+[git_branch]
+symbol = " "
+style = "bold mauve"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bold peach"
+format = "[$all_status$ahead_behind]($style) "
+conflicted = "="
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = "?"
+stashed = "*"
+modified = "!"
+staged = "+"
+deleted = "-"
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+[cmd_duration]
+min_time = 500
+style = "yellow"
+format = "[ $duration]($style) "
+
+[time]
+disabled = false
+time_format = "%R"
+style = "overlay1"
+format = "[$time]($style)"
+
+[nodejs]
+symbol = " "
+style = "green"
+format = "[$symbol$version]($style) "
+
+[python]
+symbol = " "
+style = "yellow"
+format = "[$symbol$version]($style) "
+
+[golang]
+symbol = " "
+style = "teal"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = " "
+style = "peach"
+format = "[$symbol$version]($style) "
+
+[java]
+symbol = " "
+style = "flamingo"
+format = "[$symbol$version]($style) "
+
+[swift]
+symbol = " "
+style = "red"
+format = "[$symbol$version]($style) "
+
+[kubernetes]
+disabled = false
+symbol = "☸ "
+style = "sapphire"
+format = '[$symbol$context( \($namespace\))]($style) '
+
+# ── Claude Code status line ───────────────────────────────────────────
+# Rendered by `starship statusline claude-code`, wired up from
+# ~/.claude/settings.json. See PLAN.md section 6.7.
+# Confirmed empirically on starship 1.26.0 (2026-08-15): with only the
+# hyphenated key present, `echo '{}' | starship statusline claude-code`
+# renders exactly the claude_model/claude_context/claude_cost profile; with
+# only `claude_code` (underscore) present, the same command instead falls
+# back to a mixed/default rendering (git_branch leaks in). The hyphenated
+# key is the one starship actually consults; `claude_code` was dead.
+[profiles]
+claude-code = "$claude_model$claude_context$claude_cost"
+
+[claude_model]
+format = "[$symbol$model ]($style)"
+symbol = "󰚩 "
+style = "bg:lavender fg:crust"
+model_aliases = { "claude-opus-5" = "opus 5", "claude-sonnet-5" = "sonnet 5", "claude-fable-5" = "fable 5", "claude-haiku-4-5-20251001" = "haiku 4.5" }
+
+[claude_context]
+format = "[ $percentage $gauge ]($style)"
+gauge_width = 4
+gauge_full_symbol = "▰"
+gauge_empty_symbol = "▱"
+
+[[claude_context.display]]
+threshold = 0
+style = "bg:surface1 fg:blue"
+
+[[claude_context.display]]
+threshold = 60
+style = "bg:surface1 fg:yellow"
+
+[[claude_context.display]]
+threshold = 80
+style = "bg:surface1 fg:red"
+
+[claude_cost]
+format = "[ \\$$cost ]($style)"
+
+[[claude_cost.display]]
+threshold = 0.0
+hidden = true
+
+[[claude_cost.display]]
+threshold = 0.10
+style = "bg:mauve fg:crust"
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"

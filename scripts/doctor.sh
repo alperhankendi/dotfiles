@@ -117,6 +117,59 @@ check_shell_startup() {
   fi
 }
 
+check_prompt_render() {
+  section "Prompt render"
+  if ! have perl; then
+    check_fail "cannot measure prompt render: perl is missing" \
+      "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done'"
+    return
+  fi
+  local start end ms
+  start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  zsh -i -c 'for f in $precmd_functions; do $f; done' >/dev/null 2>&1
+  end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  case "$start$end" in
+    '' | *[!0-9]*)
+      check_fail "prompt render measurement produced no usable reading" \
+        "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done'"
+      return
+      ;;
+  esac
+  ms=$((end - start))
+  # This includes shell startup, so it is always larger than the startup
+  # number above; what matters is the gap between them.
+  if [ "$ms" -lt 300 ]; then
+    check_ok "shell startup plus one prompt render takes ${ms}ms"
+  else
+    check_warn "shell startup plus one prompt render takes ${ms}ms" \
+      "profile the prompt with: starship timings"
+  fi
+}
+
+check_starship() {
+  section "starship"
+  if ! have starship; then
+    check_fail "starship is missing" "run: dot brew"
+    return
+  fi
+  local version major minor
+  version="$(starship --version | head -1 | awk '{print $2}')"
+  major="${version%%.*}"
+  minor="${version#*.}"
+  minor="${minor%%.*}"
+  if [ "$major" -gt 1 ] || { [ "$major" -eq 1 ] && [ "$minor" -ge 25 ]; }; then
+    check_ok "starship $version supports the Claude status line"
+  else
+    check_fail "starship $version is older than 1.25" "run: brew upgrade starship"
+  fi
+  if starship config --help >/dev/null 2>&1 && \
+     starship print-config >/dev/null 2>&1; then
+    check_ok "starship.toml parses"
+  else
+    check_fail "starship.toml does not parse" "check ~/.config/starship.toml"
+  fi
+}
+
 check_local_files() {
   section "Machine-local files"
 
@@ -152,7 +205,7 @@ check_sheldon() {
     return
   fi
   local src
-  if ! src="$(sheldon source 2>/dev/null)"; then
+  if ! src="$(sheldon source 2>/dev/null | sed 's/#.*//')"; then
     check_fail "sheldon source fails" "check ~/.config/sheldon/plugins.toml"
     return
   fi
@@ -192,8 +245,10 @@ main() {
   check_symlinks
   check_bundle
   check_shell_startup
+  check_prompt_render
   check_local_files
   check_sheldon
+  check_starship
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

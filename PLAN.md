@@ -597,5 +597,5 @@ Details that do not block implementation and can be settled along the way:
 1. **tmux prefix** — the plan says `C-a` (as does the reference). Staying on `C-b` is a one-line change.
 2. **bat theme** — vendor the `.tmTheme` (better highlighting, a few hundred lines of text) or use `--theme=ansi` (zero files, duller output).
 3. **Ghostty transparency** — `background-opacity` and `background-blur` are in the plan; drop both if you want it plainer.
-4. **starship profile key** — `claude-code` or `claude_code`; to be confirmed against `starship --version` during installation (§6.7).
+4. **starship profile key** — resolved: `claude-code` (hyphen). Confirmed empirically on starship 1.26.0: `echo '{}' | starship statusline claude-code` renders the intended profile only when `[profiles]` has the hyphenated key; with only `claude_code` (underscore) present the same command falls back to a mixed/default rendering instead. `claude_code` was removed from `packages/starship/.config/starship.toml`.
 5. **Remote** — resolved: `https://github.com/alperhankendi/dotfiles`, created empty. `git init` runs as the first implementation step; nothing is pushed until the whole build is finished and reviewed.
