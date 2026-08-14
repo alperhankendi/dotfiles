@@ -169,13 +169,15 @@ check_starship() {
   # Deliberately `grep -c`, not `grep -q`: on invalid TOML, starship keeps
   # writing to stderr after the "Unable to parse" line (a follow-up warning
   # dump). `grep -q` exits the instant it sees the match, closing its end of
-  # the pipe; starship's next stderr write then gets SIGPIPE and panics
-  # (Rust's default SIGPIPE behaviour), exiting 101. Because this script runs
-  # with `set -o pipefail`, that 101 becomes the pipeline's exit status
-  # instead of grep's own (successful) 0 — so `if pipeline; then` reads a
-  # match as "no match" and silently reports the broken config as fine.
-  # Measured: 2/20 correct detections with `-q` vs 20/20 with `-c`, which
-  # reads to EOF and so never gives starship a reason to receive SIGPIPE.
+  # the pipe; starship's next stderr write then fails with EPIPE, which the
+  # Rust runtime surfaces as a panic (exit 101) rather than a silent SIGPIPE
+  # death. Because this script runs with `set -o pipefail`, that 101 becomes
+  # the pipeline's exit status instead of grep's own (successful) 0 — so
+  # `if pipeline; then` reads a match as "no match" and silently reports the
+  # broken config as fine.
+  # `-c` reads to EOF, so starship never has its pipe closed early and the
+  # race cannot occur. The failure is timing-dependent and does not reproduce
+  # on every machine — the mechanism is the reason for `-c`, not a frequency.
   local hits
   hits="$(starship print-config 2>&1 >/dev/null | grep -c 'Unable to parse the config file')"
   if [ "$hits" -gt 0 ]; then
