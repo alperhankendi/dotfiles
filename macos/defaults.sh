@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # macOS system defaults. Curated, not exhaustive: every setting here is one
 # you would otherwise change by hand on a new machine. See PLAN.md 6.12.
+#
+# No `dot doctor` check watches these settings. Every other layer in this
+# repository is owned by the repository; this one is owned by the person —
+# the owner is expected to change these by hand in System Settings whenever
+# they like, and a doctor check would report that deliberate choice as a
+# fault.
 set -euo pipefail
 
 DRY_RUN=0
@@ -27,15 +33,15 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ "$DRY_RUN" -eq 1 ]; then
-  cat <<'EOF'
-This script would change:
-  Keyboard  faster key repeat, shorter delay, press-and-hold disabled
-  Finder    show extensions, path bar, status bar, hidden files, list view,
-            no .DS_Store on network or USB volumes
-  Dock      autohide with no delay, no recent applications, 48px tiles
-  Screen    screenshots to ~/Desktop/Screenshots as PNG without shadows
-  Misc      expanded save and print dialogs, no smart quotes or dashes
-EOF
+  printf 'This script would change the following, all in per-user preference domains:\n\n'
+  # Pair each explanatory comment with the setting it documents, so this
+  # summary cannot drift from the script the way a hand-written one does.
+  awk '
+    /^#/            { comment = substr($0, 3); next }
+    /^defaults write/ { if (comment != "") { printf "  %-46s %s\n", $3 " " $4, comment; comment = "" } }
+    /^$/            { comment = "" }
+  ' "$0"
+  printf '\nNothing has been changed. Run without --dry-run to apply.\n'
   exit 0
 fi
 
@@ -54,12 +60,13 @@ if [ "$ASSUME_YES" -eq 0 ]; then
   esac
 fi
 
-# Ask for the administrator password once and keep the session alive.
-sudo -v
+# No sudo: every domain below is per-user. If a future setting needs a system
+# domain, add the sudo call next to it rather than blanket-elevating the script.
 
 # ── Keyboard ──────────────────────────────────────────────────────────
-# Fastest key repeat and the shortest delay before it starts.
+# Fastest key repeat.
 defaults write NSGlobalDomain KeyRepeat -int 2
+# Shortest delay before repeat starts.
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 # Holding a key repeats it instead of opening the accent picker.
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
@@ -67,23 +74,31 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 # ── Text ──────────────────────────────────────────────────────────────
-# Smart quotes and dashes corrupt code snippets.
+# No smart quotes; they corrupt code snippets.
 defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+# No smart dashes; they corrupt code snippets.
 defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+# No automatic capitalization while typing.
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+# No automatic spelling correction while typing.
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
 # ── Dialogs ───────────────────────────────────────────────────────────
-# Always show the expanded save and print panels.
+# Always show the expanded save panel.
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+# Always show the expanded print panel.
 defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
 # Save to disk by default rather than to iCloud.
 defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 
 # ── Finder ────────────────────────────────────────────────────────────
+# Show file extensions in every filename, not just some.
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+# Show files and folders that start with a dot.
 defaults write com.apple.finder AppleShowAllFiles -bool true
+# Show the folder path bar at the bottom of every window.
 defaults write com.apple.finder ShowPathbar -bool true
+# Show the item-count status bar at the bottom of every window.
 defaults write com.apple.finder ShowStatusBar -bool true
 # Search the current folder by default instead of the whole Mac.
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
@@ -93,23 +108,32 @@ defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 # Keep folders on top when sorting by name.
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
-# Do not litter network and USB volumes with .DS_Store files.
+# Do not litter network volumes with .DS_Store files.
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+# Do not litter USB volumes with .DS_Store files.
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 # ── Dock ──────────────────────────────────────────────────────────────
+# Hide the Dock until the pointer reaches the edge of the screen.
 defaults write com.apple.dock autohide -bool true
+# No pause before the hidden Dock starts sliding in.
 defaults write com.apple.dock autohide-delay -float 0
+# Fast slide animation when the Dock shows or hides.
 defaults write com.apple.dock autohide-time-modifier -float 0.15
+# 48px icons.
 defaults write com.apple.dock tilesize -int 48
+# No "recent applications" section cluttering the Dock.
 defaults write com.apple.dock show-recents -bool false
 # No bouncing icons demanding attention.
 defaults write com.apple.dock no-bouncing -bool true
 
 # ── Screenshots ───────────────────────────────────────────────────────
 mkdir -p "$HOME/Desktop/Screenshots"
+# Save screenshots under ~/Desktop/Screenshots instead of directly on the desktop.
 defaults write com.apple.screencapture location -string "$HOME/Desktop/Screenshots"
+# PNG, not whatever format the last screenshot happened to use.
 defaults write com.apple.screencapture type -string "png"
+# No drop shadow around window screenshots.
 defaults write com.apple.screencapture disable-shadow -bool true
 
 # ── Apply ─────────────────────────────────────────────────────────────
