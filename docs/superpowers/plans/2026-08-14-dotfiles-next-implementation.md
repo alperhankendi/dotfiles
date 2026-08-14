@@ -2666,9 +2666,8 @@ bootstrap would run, in order:
   5. dot link (every package)
   6. tmux plugin managers: TPM and Catppuccin
   7. mise install
-  8. bat cache --build
-  9. macOS defaults (unless --skip-macos)
- 10. dot doctor
+  8. macOS defaults (unless --skip-macos)
+  9. dot doctor
 EOF
     return 0
   fi
@@ -2740,9 +2739,6 @@ EOF
 
   section "Runtimes"
   mise install
-
-  section "bat theme cache"
-  bat cache --build
 
   section "Neovim plugins"
   nvim --headless "+Lazy! sync" +qa || warn "nvim plugin sync reported a problem"

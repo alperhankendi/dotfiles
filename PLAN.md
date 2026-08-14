@@ -24,7 +24,7 @@ This is not a product meant to be shared. Nobody else is expected to clone it, s
 These arbitrate every later decision. When a choice is close, check it against the principles.
 
 1. **Declarative over imperative.** Configuration is a TOML/INI/conf file, not a chain of `if [[ $? != 0 ]]`. Adding a tool should mean writing three lines of text, not reading a script.
-2. **No binaries in the repo.** Fonts, themes, icons, plists come from the package manager. The single exception is text-format theme files (§6.9).
+2. **No binaries in the repo.** Fonts, themes, icons, plists come from the package manager. One text file is vendored — delta's Catppuccin theme (§6.9) — because delta ships no Catppuccin of its own. bat needs no such file: it ships all four Catppuccin flavours built in.
 3. **One tool, one file.** If a tool's settings are scattered across two places, the design is wrong.
 4. **Reproducibility, honestly scoped.** Pin what can be pinned: `lazy-lock.json` for Neovim plugins, explicit versions in `mise` for language runtimes, a git tag for the Catppuccin tmux theme. Homebrew is the deliberate exception — as of Homebrew 6 there is no `Brewfile.lock.json` and no lockfile concept at all, so the Brewfile guarantees the same *set* of tools on every machine, at whatever version Homebrew currently ships. For a personal CLI toolchain that is the right trade; anything stronger would mean pinning formula revisions by hand and re-pinning them forever.
 5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. Two things genuinely need a person, and both are asked **once, at the very start**, never mid-run: the administrator password (Homebrew must create `/opt/homebrew`, and the macOS defaults need root), and the confirmation before those defaults are applied. `--yes` silences the confirmation, `--skip-macos` skips the defaults entirely, and neither prompt appears when stdin is not a TTY, so CI is unaffected. Everything after that first prompt runs to completion without attention.
@@ -136,7 +136,7 @@ One entry point. Humans and agents use the same interface.
 
 | Command | What it does |
 |---------|--------------|
-| `dot bootstrap [--yes] [--skip-macos] [--skip-gui]` | Full install: Xcode CLT → Homebrew → `brew bundle` → `sheldon lock` → `dot link` → TPM and tmux plugins → `mise install` → `bat cache --build` → macOS defaults (prompted) → `dot doctor` |
+| `dot bootstrap [--yes] [--skip-macos] [--skip-gui]` | Full install: Xcode CLT → Homebrew → `brew bundle` → `sheldon lock` → `dot link` → TPM and tmux plugins → `mise install` → macOS defaults (prompted) → `dot doctor` |
 | `dot link [package...]` | `stow --no-folding --restow`. With no arguments: every package |
 | `dot unlink [package...]` | `stow -D` |
 | `dot brew [--gui]` | `brew bundle --file=homebrew/Brewfile` (plus `.gui`) |
@@ -428,7 +428,7 @@ Plus `packages/git/.config/git/ignore` for the global ignore list (`.DS_Store`, 
 | Tool | File | Note |
 |------|------|------|
 | **delta** | `packages/delta/.config/delta/catppuccin.gitconfig` | **Divergence from the reference:** it clones the `catppuccin/delta` repo during bootstrap, a hidden external dependency. We **vendor** the ~30-line theme instead |
-| **bat** | `packages/bat/.config/bat/config` plus `themes/Catppuccin Mocha.tmTheme` | bat does not ship Catppuccin. One `.tmTheme` file (text, a few hundred lines) — a deliberate exception to principle 2. `dot bootstrap` runs `bat cache --build`. *Alternative: `--theme=ansi`, zero files but duller highlighting* |
+| **bat** | `packages/bat/.config/bat/config` | **Corrected during implementation:** bat 0.26.1 ships Catppuccin Latte, Frappe, Macchiato and Mocha built in, verified against an empty config directory. No theme file is vendored and no `bat cache --build` is needed — both were in the original plan and both were unnecessary |
 | **atuin** | `packages/atuin/.config/atuin/config.toml` | ~20 lines: `auto_sync = false`, `update_check = false`, `enter_accept = true`, `style = compact`. The reference's 300 lines of commented-out defaults are not carried over |
 | **mise** | `packages/mise/.config/mise/config.toml` | node and python pinned; others added when needed |
 | **eza / fzf / zoxide** | `exports.zsh` and `aliases.zsh` | No separate config file; Catppuccin fzf colors live in `FZF_DEFAULT_OPTS` |

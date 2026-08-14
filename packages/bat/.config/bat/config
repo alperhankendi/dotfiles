@@ -1,5 +1,5 @@
-# bat. The theme file lives in themes/ and needs `bat cache --build`
-# after any change. See PLAN.md section 6.9.
+# bat. Catppuccin Mocha is built into bat itself — no theme file to vendor,
+# no cache to rebuild. See PLAN.md section 6.9.
 --theme="Catppuccin Mocha"
 --style="numbers,changes,header"
 --italic-text=always

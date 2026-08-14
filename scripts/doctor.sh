@@ -346,15 +346,22 @@ check_cli_tools() {
     check_fail "bat is missing" "run: dot brew"
   fi
 
-  if [ -f "$HOME/.config/delta/catppuccin.gitconfig" ]; then
-    check_ok "the delta theme is present"
+  # A file on disk proves nothing: delta falls back to unstyled diff silently
+  # if git never resolves the include. Ask git what it actually sees.
+  if [ "$(git config --get delta.catppuccin-mocha.syntax-theme 2>/dev/null)" != "" ]; then
+    check_ok "git resolves the delta Catppuccin include"
   else
-    check_fail "the delta theme is missing" "run: dot link delta"
+    check_fail "git does not resolve the delta theme include" \
+      "run: dot link delta git   (then: git config --get delta.catppuccin-mocha.syntax-theme)"
   fi
 
   # Atuin must never sync. This is a privacy guarantee, not a preference.
+  # This verifies the committed file DECLARES sync off — the privacy guarantee,
+  # and the part we control. It deliberately does not claim to prove atuin can
+  # parse the file; no cheap config-validation subcommand exists, and a check
+  # that overstated itself would be worse than one with a stated limit.
   if [ -f "$HOME/.config/atuin/config.toml" ]; then
-    if grep -q '^auto_sync = false' "$HOME/.config/atuin/config.toml"; then
+    if grep -qE '^[[:space:]]*auto_sync[[:space:]]*=[[:space:]]*false' "$HOME/.config/atuin/config.toml"; then
       check_ok "Atuin sync is disabled"
     else
       check_fail "Atuin sync is not explicitly disabled" \
@@ -365,10 +372,10 @@ check_cli_tools() {
   fi
 
   if have mise; then
-    if mise doctor >/dev/null 2>&1; then
-      check_ok "mise is healthy"
+    if mise cfg >/dev/null 2>&1; then
+      check_ok "mise reads its configuration"
     else
-      check_warn "mise reports problems" "run: mise doctor"
+      check_fail "mise cannot read its configuration" "run: mise cfg"
     fi
   else
     check_fail "mise is missing" "run: dot brew"
