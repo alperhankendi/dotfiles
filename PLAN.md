@@ -267,7 +267,7 @@ apply  = ["defer"]
 
 ```conf
 # ── Appearance ──
-theme = catppuccin-mocha
+theme = Catppuccin Mocha            # exact name from `ghostty +list-themes`
 font-family = Anka/Coder
 font-family = Symbols Nerd Font Mono     # fallback — Anka is not a Nerd Font (§9.1)
 font-size = 14
@@ -298,7 +298,9 @@ notify-on-command-finish = unfocused
 notify-on-command-finish-after = 30s     # macOS notification when a long build/test/agent finishes
 
 # ── Keybinds: ONLY what tmux cannot do ──
-keybind = global:cmd+grave=toggle_quick_terminal
+keybind = global:cmd+backquote=toggle_quick_terminal
+keybind = super+d=unbind                 # Ghostty ships split binds; see below
+keybind = super+shift+d=unbind
 keybind = cmd+shift+s=write_scrollback_file:paste
 keybind = cmd+shift+r=reload_config
 keybind = shift+enter=text:\n            # multi-line input in Claude Code
@@ -316,11 +318,11 @@ config-file = ?local.conf
    ```
    No more selecting forty minutes of build output with the mouse. The most expensive step of giving an agent context collapses into one shortcut.
 2. **Command palette** — `cmd+shift+p`, fuzzy search over every action. Because it removes the need to memorize shortcuts, this repo defines very few keybinds.
-3. **`global:cmd+grave` quick terminal** — the successor to the old iTerm backtick reflex. Same muscle memory, now as a drop-down agent session.
+3. **`global:cmd+backquote` quick terminal** — the successor to the old iTerm backtick reflex. Same muscle memory, now as a drop-down agent session.
 
 Alongside those: the Kitty Graphics Protocol (images in the terminal), `cmd+F` scrollback search, OSC 133 prompt detection, and a genuine AppKit application (Zig plus Metal).
 
-**Split keybinds are deliberately undefined** — splits live in tmux (decision 2.13).
+**Split keybinds are deliberately undefined, and Ghostty's own defaults are unbound** — splits live in tmux (decision 2.13). Defining none is not enough: Ghostty ships `super+d` and `super+shift+d` bound to `new_split`, and a split created that way dies with the terminal. That defeats the entire reason tmux was chosen (§6.5), so both are explicitly unbound. Delete the two `unbind` lines to get them back.
 
 **Custom shaders** (cursor smear, CRT, glow) are supported but **out of scope**: they require downloading GLSL from an external repo, which sits close to principle 2. Add one line to `local.conf` if wanted.
 

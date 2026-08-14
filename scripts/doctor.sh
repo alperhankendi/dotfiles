@@ -273,17 +273,23 @@ check_ghostty() {
     check_fail "the Ghostty config has errors" "run: $ghostty +validate-config"
   fi
 
-  if "$ghostty" +list-fonts 2>/dev/null | grep -qi 'anka'; then
-    check_ok "the Anka/Coder font is installed"
-  else
-    check_fail "the Anka/Coder font is missing" "run: brew install --cask font-anka-coder"
-  fi
-
+  # Anka/Coder is not a Nerd Font, so this fallback is what actually renders
+  # icons and status glyphs; losing it breaks glyph rendering across the
+  # stack (starship, tmux, nvim), so it fails the check rather than warning.
   if "$ghostty" +list-fonts 2>/dev/null | grep -qi 'symbols nerd font'; then
     check_ok "the Nerd Font symbol fallback is installed"
   else
-    check_warn "the Nerd Font symbol fallback is missing" \
+    check_fail "the Nerd Font symbol fallback is missing; icons and status glyphs will not render" \
       "run: brew install --cask font-symbols-only-nerd-font"
+  fi
+
+  # Losing Anka/Coder just falls back to a system monospace font — Ghostty
+  # still works, it only looks wrong — so this only warns.
+  if "$ghostty" +list-fonts 2>/dev/null | grep -qi 'anka'; then
+    check_ok "the Anka/Coder font is installed"
+  else
+    check_warn "the Anka/Coder font is missing; Ghostty will fall back to a system font" \
+      "run: brew install --cask font-anka-coder"
   fi
 }
 

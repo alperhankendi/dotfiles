@@ -49,6 +49,12 @@ keybind = cmd+shift+s=write_scrollback_file:paste
 keybind = cmd+shift+r=reload_config
 # Multi-line input in Claude Code.
 keybind = shift+enter=text:\n
+# Ghostty ships cmd+d and cmd+shift+d bound to new_split. Splits live in tmux
+# (PLAN.md 2.13) because a Ghostty split dies with the window, while a tmux
+# pane survives a closed terminal and a reboot. Unbind both so the reflex
+# cannot create a pane that will not come back.
+keybind = super+d=unbind
+keybind = super+shift+d=unbind
 
 # ── Machine-local overrides (gitignored) ──────────────────────────────
 config-file = ?local.conf
