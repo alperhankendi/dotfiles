@@ -417,9 +417,13 @@ check_neovim() {
   # is useless here. Lua errors do reach stderr, so key on that instead. Not
   # every stderr line is a failure though: harmless deprecation notices and
   # treesitter compile messages also land there, so only match lines that
-  # look like an actual Neovim error.
+  # look like an actual Neovim error. Case-insensitive, since a plugin or LSP
+  # subprocess writing a lowercase "error:" is still a real failure — but not
+  # bare `-i`, which would also flag a harmless line that merely contains the
+  # word "errors" (e.g. a checkhealth summary).
   local nvim_err
-  nvim_err="$(nvim --headless "+qa" 2>&1 >/dev/null | grep -E '^E[0-9]+:|Error' | head -1)"
+  nvim_err="$(nvim --headless "+qa" 2>&1 >/dev/null \
+    | grep -iE '^E[0-9]+:|^error|[[:space:]]error:|Error in' | head -1)"
   if [ -z "$nvim_err" ]; then
     check_ok "nvim starts without errors"
   else
