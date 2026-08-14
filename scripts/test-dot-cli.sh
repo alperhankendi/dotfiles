@@ -36,15 +36,23 @@ assert_exit 1 "unknown subcommand exits 1" "$DOT" definitely-not-a-command
 assert_stdout_contains "Usage: dot" "help prints usage" "$DOT" help
 assert_stdout_contains "doctor" "help lists the doctor subcommand" "$DOT" help
 
-# dot_packages must list every directory under packages/ and nothing else.
+# dot_packages must emit exactly the directory names under packages/, sorted,
+# one per line. Verified against a controlled fixture rather than a second
+# find, so a broken filter, a missing sort, or a bad basename actually fails.
 # shellcheck source=scripts/lib.sh
 . "$ROOT/scripts/lib.sh"
-expected_count="$(find "$ROOT/packages" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-actual_count="$(dot_packages | wc -l | tr -d ' ')"
-if [ "$expected_count" = "$actual_count" ]; then
-  printf '  ok   dot_packages lists %s packages\n' "$actual_count"
+fixture="$(mktemp -d)"
+mkdir -p "$fixture/packages/zeta" "$fixture/packages/alpha" "$fixture/packages/mid"
+touch "$fixture/packages/loose-file"
+saved_root="$DOT_ROOT"
+DOT_ROOT="$fixture"
+fixture_output="$(dot_packages | tr '\n' ' ')"
+DOT_ROOT="$saved_root"
+rm -rf "$fixture"
+if [ "$fixture_output" = "alpha mid zeta " ]; then
+  printf '  ok   dot_packages lists directories sorted, one per line\n'
 else
-  printf '  FAIL dot_packages listed %s, expected %s\n' "$actual_count" "$expected_count"
+  printf '  FAIL dot_packages returned [%s], expected [alpha mid zeta ]\n' "$fixture_output"
   status=1
 fi
 
