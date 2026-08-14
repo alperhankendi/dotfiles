@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# dot — the single entry point for this dotfiles repository.
+# See PLAN.md section 5 for the command contract.
+set -euo pipefail
+
+# shellcheck source=scripts/lib.sh
+. "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)/scripts/lib.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: dot <command> [options]
+
+Commands:
+  bootstrap [--yes] [--skip-macos] [--skip-gui]
+                      Full install on a fresh machine
+  link [package...]   Symlink packages into $HOME (default: all)
+  unlink [package...] Remove those symlinks
+  brew [--gui]        Install Homebrew packages
+  macos               Apply macOS system defaults
+  update              Update Homebrew, plugins, and runtimes
+  doctor              Check that everything is in place
+  help                Show this message
+EOF
+}
+
+main() {
+  local cmd="${1:-help}"
+  [ "$#" -gt 0 ] && shift
+
+  case "$cmd" in
+    help | -h | --help) usage ;;
+    link | unlink | brew | macos | update | doctor | bootstrap)
+      info "$cmd: not implemented yet"
+      ;;
+    *)
+      err "unknown command: $cmd"
+      usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
