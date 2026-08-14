@@ -151,10 +151,27 @@ check_sheldon() {
     check_fail "sheldon is missing" "run: dot brew"
     return
   fi
-  if sheldon source >/dev/null 2>&1; then
-    check_ok "sheldon source runs cleanly"
-  else
+  local src
+  if ! src="$(sheldon source 2>/dev/null)"; then
     check_fail "sheldon source fails" "check ~/.config/sheldon/plugins.toml"
+    return
+  fi
+  # Exit status alone is not enough: a plugins.toml that parses but wires
+  # nothing still exits 0. Confirm the emitted script really initialises the
+  # tools the shell layer depends on.
+  local want missing=""
+  for want in zsh-defer fzf-tab zsh-autosuggestions zsh-syntax-highlighting \
+              starship zoxide mise fzf atuin; do
+    case "$src" in
+      *"$want"*) ;;
+      *) missing="$missing $want" ;;
+    esac
+  done
+  if [ -n "$missing" ]; then
+    check_fail "sheldon source omits:$missing" \
+      "check the plugin list and the [plugins.tooling] block in ~/.config/sheldon/plugins.toml"
+  else
+    check_ok "sheldon source wires every expected tool"
   fi
 }
 
