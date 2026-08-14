@@ -121,17 +121,17 @@ check_prompt_render() {
   section "Prompt render"
   if ! have perl; then
     check_fail "cannot measure prompt render: perl is missing" \
-      "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done'"
+      "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done; print -rP \"\$PROMPT\$RPROMPT\"'"
     return
   fi
   local start end ms
   start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
-  zsh -i -c 'for f in $precmd_functions; do $f; done' >/dev/null 2>&1
+  zsh -i -c 'for f in $precmd_functions; do $f; done; print -rP "$PROMPT$RPROMPT"' >/dev/null 2>&1
   end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
   case "$start$end" in
     '' | *[!0-9]*)
       check_fail "prompt render measurement produced no usable reading" \
-        "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done'"
+        "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done; print -rP \"\$PROMPT\$RPROMPT\"'"
       return
       ;;
   esac
@@ -162,11 +162,26 @@ check_starship() {
   else
     check_fail "starship $version is older than 1.25" "run: brew upgrade starship"
   fi
-  if starship config --help >/dev/null 2>&1 && \
-     starship print-config >/dev/null 2>&1; then
-    check_ok "starship.toml parses"
+  # `starship print-config` exits 0 even on invalid TOML, printing an error to
+  # stderr and falling back to defaults — so the exit status proves nothing.
+  # stderr is noisy on a healthy config too, so match the specific failure.
+  #
+  # Deliberately `grep -c`, not `grep -q`: on invalid TOML, starship keeps
+  # writing to stderr after the "Unable to parse" line (a follow-up warning
+  # dump). `grep -q` exits the instant it sees the match, closing its end of
+  # the pipe; starship's next stderr write then gets SIGPIPE and panics
+  # (Rust's default SIGPIPE behaviour), exiting 101. Because this script runs
+  # with `set -o pipefail`, that 101 becomes the pipeline's exit status
+  # instead of grep's own (successful) 0 — so `if pipeline; then` reads a
+  # match as "no match" and silently reports the broken config as fine.
+  # Measured: 2/20 correct detections with `-q` vs 20/20 with `-c`, which
+  # reads to EOF and so never gives starship a reason to receive SIGPIPE.
+  local hits
+  hits="$(starship print-config 2>&1 >/dev/null | grep -c 'Unable to parse the config file')"
+  if [ "$hits" -gt 0 ]; then
+    check_fail "starship.toml does not parse" "run: starship print-config"
   else
-    check_fail "starship.toml does not parse" "check ~/.config/starship.toml"
+    check_ok "starship.toml parses"
   fi
 }
 
