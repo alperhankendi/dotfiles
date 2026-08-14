@@ -58,4 +58,46 @@ fi
 
 assert_stdout_contains "Homebrew" "doctor checks for Homebrew" "$DOT" doctor
 
+# The check helpers are the contract ten later tasks build on, so exercise
+# them directly. Sourcing doctor.sh does not run the checks (see its guard).
+# shellcheck source=scripts/doctor.sh
+. "$ROOT/scripts/doctor.sh"
+
+DOCTOR_FAILED=0
+check_warn "a warning" "a hint" >/dev/null 2>&1
+if [ "$DOCTOR_FAILED" -eq 0 ]; then
+  printf '  ok   check_warn leaves DOCTOR_FAILED clear\n'
+else
+  printf '  FAIL check_warn set DOCTOR_FAILED to %s, expected 0\n' "$DOCTOR_FAILED"
+  status=1
+fi
+
+DOCTOR_FAILED=0
+check_ok "a passing check" >/dev/null 2>&1
+if [ "$DOCTOR_FAILED" -eq 0 ]; then
+  printf '  ok   check_ok leaves DOCTOR_FAILED clear\n'
+else
+  printf '  FAIL check_ok set DOCTOR_FAILED to %s, expected 0\n' "$DOCTOR_FAILED"
+  status=1
+fi
+
+DOCTOR_FAILED=0
+check_fail "a failing check" "a hint" >/dev/null 2>&1
+if [ "$DOCTOR_FAILED" -eq 1 ]; then
+  printf '  ok   check_fail sets DOCTOR_FAILED\n'
+else
+  printf '  FAIL check_fail left DOCTOR_FAILED at %s, expected 1\n' "$DOCTOR_FAILED"
+  status=1
+fi
+
+# The fix hint must reach the user — a failure with no remedy is not useful.
+fail_output="$(check_fail "a failing check" "run something specific" 2>&1)"
+case "$fail_output" in
+  *"run something specific"*)
+    printf '  ok   check_fail includes the fix hint in its output\n' ;;
+  *)
+    printf '  FAIL check_fail output omitted the fix hint: [%s]\n' "$fail_output"
+    status=1 ;;
+esac
+
 exit "$status"

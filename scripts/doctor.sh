@@ -44,4 +44,8 @@ main() {
   return "$DOCTOR_FAILED"
 }
 
-main "$@"
+# Run the checks only when this file is executed directly. Sourcing it
+# instead exposes the check helpers so tests can exercise them in isolation.
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi
