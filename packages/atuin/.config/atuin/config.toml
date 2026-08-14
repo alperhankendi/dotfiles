@@ -1,0 +1,18 @@
+# Shell history. Sync is off and stays off: nothing leaves this machine.
+# See PLAN.md section 2.11.
+
+auto_sync = false
+update_check = false
+
+search_mode = "fuzzy"
+filter_mode = "global"
+style = "compact"
+inline_height = 20
+show_preview = true
+enter_accept = true
+
+# Never record anything that looks like a credential.
+secrets_filter = true
+history_filter = [
+  "^\\s*export .*(TOKEN|KEY|SECRET|PASSWORD)",
+]

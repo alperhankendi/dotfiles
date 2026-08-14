@@ -1,0 +1,6 @@
+# bat. The theme file lives in themes/ and needs `bat cache --build`
+# after any change. See PLAN.md section 6.9.
+--theme="Catppuccin Mocha"
+--style="numbers,changes,header"
+--italic-text=always
+--paging=auto

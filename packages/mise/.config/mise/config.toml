@@ -1,0 +1,9 @@
+# Runtime versions. Add a language here rather than installing it with brew,
+# so projects can pin their own version with a local .mise.toml.
+
+[tools]
+node = "22"
+python = "3.13"
+
+[settings]
+python.uv_venv_auto = true

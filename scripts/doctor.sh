@@ -321,11 +321,57 @@ check_tmux() {
   )"
   conf_rc=$?
   tmux -L "$sock" kill-server >/dev/null 2>&1
+  # kill-server stops the server but leaves the socket file behind, and doctor
+  # would otherwise litter one per run. tmux puts sockets under
+  # ${TMUX_TMPDIR:-/tmp}/tmux-<uid>/.
+  rm -f "${TMUX_TMPDIR:-/tmp}/tmux-$(id -u)/$sock"
   if [ "$conf_rc" -eq 0 ]; then
     check_ok "tmux.conf loads without errors"
   else
     check_fail "tmux.conf has errors: $conf_out" \
       "reproduce with: tmux -L probe -f /dev/null new-session -d \\; source-file ~/.config/tmux/tmux.conf"
+  fi
+}
+
+check_cli_tools() {
+  section "CLI tools"
+
+  if have bat; then
+    if bat --list-themes 2>/dev/null | grep -q 'Catppuccin Mocha'; then
+      check_ok "the bat Catppuccin Mocha theme is built"
+    else
+      check_fail "the bat theme cache is not built" "run: bat cache --build"
+    fi
+  else
+    check_fail "bat is missing" "run: dot brew"
+  fi
+
+  if [ -f "$HOME/.config/delta/catppuccin.gitconfig" ]; then
+    check_ok "the delta theme is present"
+  else
+    check_fail "the delta theme is missing" "run: dot link delta"
+  fi
+
+  # Atuin must never sync. This is a privacy guarantee, not a preference.
+  if [ -f "$HOME/.config/atuin/config.toml" ]; then
+    if grep -q '^auto_sync = false' "$HOME/.config/atuin/config.toml"; then
+      check_ok "Atuin sync is disabled"
+    else
+      check_fail "Atuin sync is not explicitly disabled" \
+        "set auto_sync = false in ~/.config/atuin/config.toml"
+    fi
+  else
+    check_fail "the Atuin config is missing" "run: dot link atuin"
+  fi
+
+  if have mise; then
+    if mise doctor >/dev/null 2>&1; then
+      check_ok "mise is healthy"
+    else
+      check_warn "mise reports problems" "run: mise doctor"
+    fi
+  else
+    check_fail "mise is missing" "run: dot brew"
   fi
 }
 
@@ -340,6 +386,7 @@ main() {
   check_starship
   check_ghostty
   check_tmux
+  check_cli_tools
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"
