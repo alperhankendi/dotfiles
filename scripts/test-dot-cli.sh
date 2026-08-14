@@ -56,4 +56,6 @@ else
   status=1
 fi
 
+assert_stdout_contains "Homebrew" "doctor checks for Homebrew" "$DOT" doctor
+
 exit "$status"

@@ -29,7 +29,10 @@ main() {
 
   case "$cmd" in
     help | -h | --help) usage ;;
-    link | unlink | brew | macos | update | doctor | bootstrap)
+    doctor)
+      bash "$DOT_ROOT/scripts/doctor.sh"
+      ;;
+    link | unlink | brew | macos | update | bootstrap)
       info "$cmd: not implemented yet"
       ;;
     *)
