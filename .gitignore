@@ -1,0 +1,16 @@
+# Reference project — read-only, never tracked
+macos-dot-files-main/
+
+# macOS noise
+.DS_Store
+
+# Machine-local secrets and identity (see PLAN.md section 2.15)
+packages/git/.config/git/local
+packages/zsh/.config/zsh/local.zsh
+packages/ghostty/.config/ghostty/local.conf
+
+# Backups produced by `dot link`
+*.bak-*
+
+# Build-process scratch space
+.superpowers/

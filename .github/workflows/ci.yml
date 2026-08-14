@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck and stow
+        run: sudo apt-get update && sudo apt-get install -y shellcheck stow
+
+      - name: Check repository structure
+        run: bash scripts/check-structure.sh
+
+      - name: shellcheck
+        run: |
+          shopt -s nullglob
+          files=(bin/dot bootstrap.sh scripts/*.sh macos/*.sh)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no shell files to check yet"
+            exit 0
+          fi
+          shellcheck "${files[@]}"
+
+      - name: stow dry run
+        run: |
+          shopt -s nullglob
+          mkdir -p "$HOME/stow-target"
+          for pkg in packages/*/; do
+            name="$(basename "$pkg")"
+            stow --dir=packages --target="$HOME/stow-target" \
+                 --no-folding --simulate --verbose=1 "$name"
+          done
