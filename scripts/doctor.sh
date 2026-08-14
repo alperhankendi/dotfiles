@@ -68,6 +68,27 @@ check_symlinks() {
       check_ok "$pkg is linked ($linked file(s))"
     fi
   done
+
+  # stow prunes a link when its source file disappears, but not when a whole
+  # source subdirectory does — a broken link survives and the loop above,
+  # which only walks the package, cannot see it. Ask the opposite question.
+  local orphans
+  # The leading "(" on each pattern below is required, not stylistic: bash
+  # 3.2 (macOS's shipped /bin/bash) miscounts an unparenthesized case
+  # pattern's closing ")" as the closing ")" of the surrounding $(...), and
+  # fails to parse this loop at all without it.
+  orphans="$(find "$HOME/.config" "$HOME/.claude" -type l ! -exec test -e {} \; -print 2>/dev/null \
+    | while IFS= read -r l; do
+        case "$(readlink "$l")" in
+          (*"$DOT_ROOT"*) printf '%s\n' "$l" ;;
+        esac
+      done)"
+  if [ -n "$orphans" ]; then
+    check_fail "broken symlinks into this repo: $(printf '%s' "$orphans" | tr '\n' ' ')" \
+      "delete them, or restore the file they pointed at"
+  else
+    check_ok "no orphaned symlinks pointing into the repo"
+  fi
 }
 
 check_bundle() {
@@ -382,6 +403,29 @@ check_cli_tools() {
   fi
 }
 
+check_neovim() {
+  section "Neovim"
+  if ! have nvim; then
+    check_fail "nvim is missing" "run: dot brew"
+    return
+  fi
+  if [ ! -f "$HOME/.config/nvim/init.lua" ]; then
+    check_fail "the nvim config is not linked" "run: dot link nvim"
+    return
+  fi
+  if nvim --headless "+qa" >/dev/null 2>&1; then
+    check_ok "nvim starts without errors"
+  else
+    check_fail "nvim reports startup errors" "run: nvim --headless +qa"
+  fi
+  if [ -f "$DOT_ROOT/packages/nvim/.config/nvim/lazy-lock.json" ]; then
+    check_ok "lazy-lock.json is committed"
+  else
+    check_warn "lazy-lock.json is missing" \
+      "run nvim once, then commit packages/nvim/.config/nvim/lazy-lock.json"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
@@ -394,6 +438,7 @@ main() {
   check_ghostty
   check_tmux
   check_cli_tools
+  check_neovim
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"
