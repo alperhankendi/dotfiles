@@ -454,6 +454,9 @@ check_claude() {
 
   # shellcheck disable=SC2088
   if [ -L "$HOME/.claude/settings.json" ]; then
+    # This proves settings.json asks for the starship status line. Whether Claude
+    # Code actually executes it is not observable from a shell script, so the
+    # check deliberately claims no more than the file's content.
     if grep -q 'starship statusline claude-code' "$HOME/.claude/settings.json"; then
       check_ok "the Claude status line is wired to starship"
     else
@@ -464,10 +467,15 @@ check_claude() {
     check_fail "~/.claude/settings.json is not linked" "run: dot link claude"
   fi
 
-  # Runtime state must never end up inside the repository.
+  # This is the guard against a folding accident silently committing session
+  # state. It must cover every path the spec lists as never-versioned, not a
+  # sample of them.
   local leaked
   leaked="$(find "$DOT_ROOT/packages/claude/.claude" \
-    \( -name 'sessions' -o -name 'projects' -o -name 'history.jsonl' \) \
+    \( -name 'sessions' -o -name 'projects' -o -name 'cache' \
+       -o -name 'shell-snapshots' -o -name 'plugins' -o -name 'telemetry' \
+       -o -name 'ide' -o -name 'backups' -o -name 'history.jsonl' \
+       -o -name 'settings.local.json' \) \
     -print -quit 2>/dev/null)"
   if [ -n "$leaked" ]; then
     check_fail "Claude runtime state leaked into the repo: $leaked" \
