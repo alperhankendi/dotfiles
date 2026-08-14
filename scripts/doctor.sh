@@ -293,6 +293,30 @@ check_ghostty() {
   fi
 }
 
+check_tmux() {
+  section "tmux"
+  if ! have tmux; then
+    check_fail "tmux is missing" "run: dot brew"
+    return
+  fi
+  if [ -d "$HOME/.config/tmux/plugins/tpm" ]; then
+    check_ok "TPM is installed"
+  else
+    check_fail "TPM is missing" \
+      "run: git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm"
+  fi
+  if [ -f "$HOME/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux" ]; then
+    check_ok "the Catppuccin theme is installed"
+  else
+    check_fail "the Catppuccin theme is missing" "run: dot bootstrap"
+  fi
+  if tmux -f "$HOME/.config/tmux/tmux.conf" start-server \; kill-server 2>/dev/null; then
+    check_ok "tmux.conf loads without errors"
+  else
+    check_fail "tmux.conf has errors" "run: tmux -f ~/.config/tmux/tmux.conf start-server"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
@@ -303,6 +327,7 @@ main() {
   check_sheldon
   check_starship
   check_ghostty
+  check_tmux
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"
