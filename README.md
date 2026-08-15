@@ -17,11 +17,19 @@ cd ~/workspace/dotfiles-next
 ./bin/dot bootstrap
 ```
 
-`dot bootstrap` asks for your administrator password once, up front (Homebrew
-needs it to create `/opt/homebrew`), and asks once more before it touches
-macOS system defaults — `--yes` skips that second prompt, `--skip-macos`
-skips it entirely, `--skip-gui` skips casks and fonts. Neither prompt appears
-when stdin is not a terminal.
+On a genuinely fresh Mac this is really two commands, not one: if the Xcode
+Command Line Tools are not installed yet, both `bootstrap.sh` and
+`dot bootstrap` detect that, launch Apple's GUI installer, print instructions
+to re-run, and exit 0 — run the same command again once that installer
+finishes.
+
+`dot bootstrap` asks for your administrator password up front (Homebrew needs
+it to create `/opt/homebrew`), and asks once more, right beside it, whether to
+apply macOS system defaults later in the run — `--yes` skips that second
+prompt, `--skip-macos` skips the defaults entirely, `--skip-gui` skips casks
+and fonts. Both prompts read the controlling terminal directly, so they still
+appear even under `curl | bash` (where stdin is a pipe); they are skipped only
+where no terminal exists at all, such as CI.
 
 Afterwards, fill in `~/.config/git/local` and `~/.config/zsh/local.zsh` —
 `dot bootstrap` creates both from their `.example` templates but leaves the
@@ -80,7 +88,8 @@ reboot.
 
 1. One line in `homebrew/Brewfile`.
 2. If it has a config, create `packages/<tool>/.config/<tool>/<file>`.
-3. `dot link && dot brew`.
+3. Add a check to `scripts/doctor.sh`.
+4. `dot link && dot brew && dot doctor`.
 
 There is no package list to update — `dot` reads `packages/*` directly.
 

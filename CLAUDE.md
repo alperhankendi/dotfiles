@@ -21,9 +21,10 @@ lost.
 - Every shell script passes `shellcheck` at zero warnings.
 - `stow` is always called with `--no-folding`. Dropping it makes Claude Code
   write its session state into this repository. See `PLAN.md` section 9.4.
-- No binaries. Fonts and applications come from Homebrew. There are no
-  vendored theme files — bat and Ghostty both ship Catppuccin Mocha built
-  in, and delta's theme lives in a plain-text `.gitconfig` fragment.
+- No binaries. Fonts and applications come from Homebrew. One text file is
+  vendored: `packages/delta/.config/delta/catppuccin.gitconfig`, because
+  delta ships no Catppuccin theme of its own. Nothing else is vendored — bat
+  and Ghostty both ship Catppuccin Mocha built in.
 - Never commit personal data. Identity and keys live in
   `~/.config/git/local` and `~/.config/zsh/local.zsh`, both gitignored, with
   `.example` templates tracked in their place.

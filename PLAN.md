@@ -27,7 +27,7 @@ These arbitrate every later decision. When a choice is close, check it against t
 2. **No binaries in the repo.** Fonts, themes, icons, plists come from the package manager. One text file is vendored — delta's Catppuccin theme (§6.9) — because delta ships no Catppuccin of its own. bat needs no such file: it ships all four Catppuccin flavours built in.
 3. **One tool, one file.** If a tool's settings are scattered across two places, the design is wrong.
 4. **Reproducibility, honestly scoped.** Pin what can be pinned: `lazy-lock.json` for Neovim plugins, explicit versions in `mise` for language runtimes, a git tag for the Catppuccin tmux theme. Homebrew is the deliberate exception — as of Homebrew 6 there is no `Brewfile.lock.json` and no lockfile concept at all, so the Brewfile guarantees the same *set* of tools on every machine, at whatever version Homebrew currently ships. For a personal CLI toolchain that is the right trade; anything stronger would mean pinning formula revisions by hand and re-pinning them forever.
-5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. Two things genuinely need a person, and both are asked **once, at the very start**, never mid-run: the administrator password, needed once so Homebrew can create `/opt/homebrew`, and the confirmation before the macOS defaults are applied. The defaults themselves need no root — every domain they write (`NSGlobalDomain`, `com.apple.finder`, `com.apple.dock`, `com.apple.screencapture`, `com.apple.desktopservices`) is per-user, verified during implementation. `--yes` silences the confirmation, `--skip-macos` skips the defaults entirely, and neither prompt appears when stdin is not a TTY, so CI is unaffected. Everything after that first prompt runs to completion without attention.
+5. **Must run unattended.** `dot bootstrap` has to work in CI and on a fresh machine without a human. Two things genuinely need a person, and both are asked **once, at the very start**, never mid-run: the administrator password, needed once so Homebrew can create `/opt/homebrew`, and the confirmation before the macOS defaults are applied — asked up front, but not *acted on* until step 11, so a twenty-plus-minute unattended run never stalls on it. The defaults themselves need no root — every domain they write (`NSGlobalDomain`, `com.apple.finder`, `com.apple.dock`, `com.apple.screencapture`, `com.apple.desktopservices`) is per-user, verified during implementation. `--yes` silences the confirmation, `--skip-macos` skips the defaults entirely. Both prompts open `/dev/tty` directly rather than checking stdin, so they still appear under `curl | bash` — where stdin is a pipe and `[ -t 0 ]` is always false — and are skipped only where no controlling terminal exists at all, such as CI. Everything after that first prompt runs to completion without attention.
 6. **Idempotent.** A second run produces the same result as the first. Never write into tracked files.
 7. **Fast shell startup.** The Ghostty quick terminal is bound to a hotkey; dozens of shells open per day. Target: `time zsh -i -c exit` under **150 ms**. No network calls, no version checks, no banner at startup.
 8. **Sources, not derived files.** If a file can be hand-edited, it is a source and must not be generator output. (This principle killed the `tools.toml` manifest idea — §3.)
@@ -147,7 +147,7 @@ One entry point. Humans and agents use the same interface.
 **Behavioral rules:**
 
 - `set -euo pipefail`. Error messages name the step that failed.
-- **Conflict policy:** if `dot link` finds a real (non-symlink) file at the destination, it never overwrites. It backs the file up as `file.bak-YYYYMMDD-HHMMSS`, reports what it did, and continues. On this machine `~/.zshrc` and `~/.claude/settings.json` already exist and will both take this path.
+- **Conflict policy:** if `dot link` finds a real (non-symlink) file at the destination, it never overwrites. It backs the file up as `file.bak-YYYYMMDD-HHMMSS`, reports what it did, and continues. On this machine `~/.claude/settings.json` already exists and will take this path. `~/.zshrc` also predates this repo, but no package targets it — only `~/.zshenv` does (§6.2) — so it never goes through the backup path at all. Once `ZDOTDIR` points at `packages/zsh/.config/zsh`, a pre-existing `~/.zshrc` is simply never sourced again; `dot link` warns about it once, by name, when linking the `zsh` package, rather than leave it silently orphaned.
 - **`--no-folding` is mandatory.** See §9.4 — without it, `~/.claude` becomes a single symlink and Claude Code cannot write its state.
 - Colored output that respects `NO_COLOR` and non-TTY contexts.
 - `bootstrap.sh` only clones the repo and delegates to `bin/dot bootstrap`, so the logic lives in exactly one place.
@@ -428,7 +428,7 @@ Plus `packages/git/.config/git/ignore` for the global ignore list (`.DS_Store`, 
 | Tool | File | Note |
 |------|------|------|
 | **delta** | `packages/delta/.config/delta/catppuccin.gitconfig` | **Divergence from the reference:** it clones the `catppuccin/delta` repo during bootstrap, a hidden external dependency. We **vendor** the ~30-line theme instead |
-| **bat** | `packages/bat/.config/bat/config` | **Corrected during implementation:** bat 0.26.1 ships Catppuccin Latte, Frappe, Macchiato and Mocha built in, verified against an empty config directory. No theme file is vendored and no `bat cache --build` is needed — both were in the original plan and both were unnecessary |
+| **bat** | `packages/bat/.config/bat/config` | **Corrected during implementation:** bat 0.26.1 ships Catppuccin Latte, Frappe, Macchiato and Mocha built in, verified against an empty config directory. No theme file is vendored and no `bat cache --build` is needed — both were in the original plan and both were unnecessary. `scripts/doctor.sh`'s fix hint for a missing theme is `brew upgrade bat`, not `bat cache --build`: a missing built-in theme means an old bat, and rebuilding a cache does not add themes the binary does not ship |
 | **atuin** | `packages/atuin/.config/atuin/config.toml` | ~20 lines: `auto_sync = false`, `update_check = false`, `enter_accept = true`, `style = compact`. The reference's 300 lines of commented-out defaults are not carried over |
 | **mise** | `packages/mise/.config/mise/config.toml` | node and python pinned; others added when needed |
 | **eza / fzf / zoxide** | `exports.zsh` and `aliases.zsh` | No separate config file; Catppuccin fzf colors live in `FZF_DEFAULT_OPTS` |
@@ -490,16 +490,12 @@ The script ends by `killall`-ing the affected apps and printing which changes ne
 
 The concrete form of this project's "three lines to add a feature" promise.
 
-**A CLI tool with no config** (e.g. `httpie`):
-1. One line in `homebrew/Brewfile`: `brew "httpie"`
-2. `dot brew`
+1. Add one line to `homebrew/Brewfile`, in the matching section, with a trailing comment.
+2. If it has configuration, create `packages/<tool>/...` mirroring the target path in `$HOME`. Theme it Catppuccin Mocha if the tool supports theming.
+3. Add a check to `scripts/doctor.sh`.
+4. `dot link && dot brew && dot doctor`.
 
-**A tool with a config** (e.g. `lazydocker`):
-1. In `homebrew/Brewfile`: `brew "lazydocker"`
-2. Create `packages/lazydocker/.config/lazydocker/config.yml`
-3. `dot link && dot brew`
-
-No package list to update, no `install.sh` to edit, no generator to run. The `/add-tool` slash command performs these steps and verifies the result with `dot doctor`.
+No package list to update, no `install.sh` to edit, no generator to run — `dot` discovers `packages/*` itself. The `/add-tool` slash command performs these steps and verifies the result with `dot doctor`.
 
 ---
 
