@@ -15,7 +15,7 @@ esac
 
 # Colour is opt-out via NO_COLOR and automatically disabled when stdout
 # is not a terminal, so piped output stays clean.
-if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+if [ -t 1 ] && [ -z "${NO_COLOR+x}" ]; then
   C_RESET=$'\033[0m'
   C_RED=$'\033[31m'
   C_GREEN=$'\033[32m'

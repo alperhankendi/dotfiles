@@ -38,8 +38,6 @@ jobs:
                   print(f"FAIL {p}: {exc}")
                   bad = 1
           for p in pathlib.Path("packages").rglob("*.json"):
-              if p.name == "lazy-lock.json":
-                  continue
               try:
                   json.loads(p.read_text())
               except Exception as exc:

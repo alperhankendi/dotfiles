@@ -26,6 +26,8 @@ require_file() {
 require_dir bin
 require_dir scripts
 require_dir homebrew
+require_file homebrew/Brewfile
+require_file homebrew/Brewfile.gui
 require_dir macos
 require_dir packages
 require_file .gitignore
