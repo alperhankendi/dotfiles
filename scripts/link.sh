@@ -19,6 +19,17 @@ backup_conflicts() {
   done < <(find "$pkg_dir" -type f)
 }
 
+# warn_orphaned_zshrc — no package targets ~/.zshrc (only ~/.zshenv does; see
+# packages/zsh). Once ZDOTDIR points at packages/zsh/.config/zsh, a
+# pre-existing ~/.zshrc is never sourced and never backed up — it just sits
+# there, inert. Warn once, by name, rather than leave it silently orphaned.
+warn_orphaned_zshrc() {
+  local zshrc="$HOME/.zshrc"
+  if [ -e "$zshrc" ] && [ ! -L "$zshrc" ] && [ -s "$zshrc" ]; then
+    warn "$zshrc exists but is now ignored — ZDOTDIR points elsewhere, so it is never sourced"
+  fi
+}
+
 # link_packages <link|unlink> [package...]
 link_packages() {
   local action="$1"
@@ -45,6 +56,9 @@ link_packages() {
       info "unlinked $pkg"
     else
       backup_conflicts "$pkg"
+      if [ "$pkg" = "zsh" ]; then
+        warn_orphaned_zshrc
+      fi
       # --no-folding is mandatory: without it stow symlinks whole
       # directories and applications can no longer write their state
       # into them. See PLAN.md section 9.4.
