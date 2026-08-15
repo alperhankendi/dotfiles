@@ -106,10 +106,44 @@ check_bundle() {
     check_fail "cannot check the bundle without Homebrew" "run: dot bootstrap"
     return
   fi
-  if brew bundle check --file="$DOT_ROOT/homebrew/Brewfile" >/dev/null 2>&1; then
+
+  local output
+  if output="$(brew bundle check --file="$DOT_ROOT/homebrew/Brewfile" --verbose 2>&1)"; then
     check_ok "every formula in homebrew/Brewfile is installed"
+    return
+  fi
+
+  # brew bundle check --verbose uses the same wording for a formula that is
+  # entirely absent and one that is installed but merely outdated:
+  #   → Formula NAME needs to be installed or updated.
+  # Cross-reference each name against what is actually installed — only the
+  # absent ones are fixed by `dot brew`; the rest need `dot update`.
+  local names installed name missing outdated
+  names="$(printf '%s\n' "$output" | sed -n 's/^→ Formula \(.*\) needs to be installed or updated\.$/\1/p')"
+  installed="$(brew list --formula --quiet)"
+  missing=""
+  outdated=""
+  while IFS= read -r name; do
+    [ -z "$name" ] && continue
+    if printf '%s\n' "$installed" | grep -qxF -- "$name"; then
+      outdated="${outdated:+$outdated }$name"
+    else
+      missing="${missing:+$missing }$name"
+    fi
+  done <<<"$names"
+
+  if [ -n "$missing" ] && [ -n "$outdated" ]; then
+    check_fail "some formulae are missing: $missing; some formulae are outdated: $outdated" \
+      "run: dot brew, then dot update"
+  elif [ -n "$missing" ]; then
+    check_fail "some formulae are missing: $missing" "run: dot brew"
+  elif [ -n "$outdated" ]; then
+    check_warn "some formulae are outdated: $outdated" "run: dot update"
   else
-    check_fail "some formulae are missing" "run: dot brew"
+    # brew bundle check failed but no line matched the formula-shaped
+    # message above (e.g. a tap problem) — don't fail silently.
+    check_fail "brew bundle check failed for homebrew/Brewfile" \
+      "run: brew bundle check --file=homebrew/Brewfile --verbose"
   fi
 }
 
