@@ -24,21 +24,32 @@ jobs:
         run: bash scripts/test-link.sh
 
       - name: shellcheck
+        run: shellcheck bin/dot bootstrap.sh scripts/*.sh macos/defaults.sh
+
+      - name: Validate TOML and JSON
         run: |
-          shopt -s nullglob
-          files=()
-          for f in bin/dot bootstrap.sh scripts/*.sh macos/*.sh; do
-            [ -f "$f" ] && files+=("$f")
-          done
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "no shell files to check yet"
-            exit 0
-          fi
-          shellcheck "${files[@]}"
+          python3 - <<'PY'
+          import json, pathlib, sys, tomllib
+          bad = 0
+          for p in pathlib.Path("packages").rglob("*.toml"):
+              try:
+                  tomllib.loads(p.read_text())
+              except Exception as exc:
+                  print(f"FAIL {p}: {exc}")
+                  bad = 1
+          for p in pathlib.Path("packages").rglob("*.json"):
+              if p.name == "lazy-lock.json":
+                  continue
+              try:
+                  json.loads(p.read_text())
+              except Exception as exc:
+                  print(f"FAIL {p}: {exc}")
+                  bad = 1
+          sys.exit(bad)
+          PY
 
       - name: stow dry run
         run: |
-          shopt -s nullglob
           mkdir -p "$HOME/stow-target"
           for pkg in packages/*/; do
             name="$(basename "$pkg")"

@@ -1,7 +1,7 @@
 # dotfiles-next — Design Document
 
 > **Handoff document.** Readable and actionable with zero prior context.
-> Date: 2026-08-14 · Owner: Alper Hankendi · Status: **design under review, implementation not started**
+> Date: 2026-08-14 · Owner: Alper Hankendi · Status: **implemented** — all 16 tasks complete, verified locally; nothing pushed to the remote yet
 > Reference project: [`macos-dot-files-main/`](macos-dot-files-main/) — [seifscape/macos-dot-files](https://github.com/seifscape/macos-dot-files)
 
 ---
@@ -596,8 +596,8 @@ work/personal profiles · Linux and devcontainer support · chezmoi or nix · `m
 
 Details that do not block implementation and can be settled along the way:
 
-1. **tmux prefix** — the plan says `C-a` (as does the reference). Staying on `C-b` is a one-line change.
-2. **bat theme** — vendor the `.tmTheme` (better highlighting, a few hundred lines of text) or use `--theme=ansi` (zero files, duller output).
-3. **Ghostty transparency** — `background-opacity` and `background-blur` are in the plan; drop both if you want it plainer.
+1. **tmux prefix** — resolved: `C-a`, as the plan proposed. `packages/tmux/.config/tmux/tmux.conf` sets `prefix C-a` and unbinds `C-b` explicitly, so a stray default binding cannot linger.
+2. **bat theme** — resolved: neither option. bat 0.26.1 ships Catppuccin Mocha (and the other three flavours) built in, confirmed against an empty config directory during Task 11. `packages/bat/.config/bat/config` sets `--theme="Catppuccin Mocha"` and vendors nothing; there is no `bat cache --build` step anywhere in `bin/dot` or `scripts/doctor.sh` because none is needed.
+3. **Ghostty transparency** — resolved: both lines survived. `packages/ghostty/.config/ghostty/config` carries `background-opacity = 0.97` and `background-blur = 20` unchanged from the plan.
 4. **starship profile key** — resolved: `claude-code` (hyphen). Confirmed empirically on starship 1.26.0: `echo '{}' | starship statusline claude-code` renders the intended profile only when `[profiles]` has the hyphenated key; with only `claude_code` (underscore) present the same command falls back to a mixed/default rendering instead. `claude_code` was removed from `packages/starship/.config/starship.toml`.
 5. **Remote** — resolved: `https://github.com/alperhankendi/dotfiles`, created empty. `git init` runs as the first implementation step; nothing is pushed until the whole build is finished and reviewed.
