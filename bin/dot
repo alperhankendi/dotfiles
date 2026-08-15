@@ -96,18 +96,6 @@ cmd_bootstrap() {
     return 0
   fi
 
-  # Installing Homebrew needs root to create /opt/homebrew. Ask once, here,
-  # so the rest of the run is uninterrupted rather than stalling on a
-  # password prompt ten minutes in. Skipped when there is no TTY, so CI
-  # still works.
-  if [ -t 0 ] && ! have brew; then
-    section "Administrator access"
-    info "Homebrew needs to create /opt/homebrew — asking for your password once"
-    sudo -v
-    # Refresh the credential in the background so it does not expire mid-run.
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-  fi
-
   section "Xcode Command Line Tools"
   if xcode-select -p >/dev/null 2>&1; then
     info "already installed"
@@ -115,6 +103,25 @@ cmd_bootstrap() {
     info "installing — follow the GUI prompt, then re-run this command"
     xcode-select --install
     exit 0
+  fi
+
+  # Homebrew needs root to create /opt/homebrew. Ask once, up front, so a long
+  # run cannot stall on a password prompt ten minutes in.
+  #
+  # The test opens /dev/tty rather than checking stdin: the documented entry
+  # point is `curl ... | bash`, where stdin is a pipe and `[ -t 0 ]` is always
+  # false even with a terminal attached. CI has no controlling terminal, so the
+  # open fails there and priming is skipped — the safe direction.
+  if ! have brew && ( : </dev/tty ) 2>/dev/null; then
+    section "Administrator access"
+    info "Homebrew needs to create /opt/homebrew — asking for your password once"
+    # SC2024: the concern is a file the invoking user cannot read being opened
+    # without sudo's privileges. /dev/tty is the user's own controlling
+    # terminal, already readable by them, so that concern does not apply here.
+    # shellcheck disable=SC2024
+    sudo -v </dev/tty
+    # Refresh in the background so it cannot expire mid-run.
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
   fi
 
   section "Homebrew"
