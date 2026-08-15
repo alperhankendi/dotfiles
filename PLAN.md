@@ -56,7 +56,7 @@ All made in this session. They can change, but only with a stated reason.
 | 2.14 | Editor | **LazyVim** | The reference setup, minus the iOS-specific pieces |
 | 2.15 | Secrets | **Gitignored `*.local` files** | `~/.config/git/local` and `~/.config/zsh/local.zsh`, with `.example` templates in the repo |
 | 2.16 | Brewfile | **Core plus CLI**, GUI in a separate file | A curated list, not a `brew bundle dump` inventory |
-| 2.17 | macOS defaults | **~25 settings, prompted during install** | `dot bootstrap` asks for confirmation; `--yes` / `--skip-macos` bypass it |
+| 2.17 | macOS defaults | **30 settings, prompted during install** | `dot bootstrap` asks for confirmation; `--yes` / `--skip-macos` bypass it |
 | 2.18 | AI layer | `~/.claude` package, repo-management commands, starship status line | Other AI CLIs (Codex/Gemini) are out of scope |
 
 ---
@@ -99,7 +99,7 @@ dotfiles-next/
 │   └── Brewfile.gui           # casks: ghostty, fonts, GUI apps
 │
 ├── macos/
-│   └── defaults.sh            # ~25 settings, every line commented (§6.12)
+│   └── defaults.sh            # 30 settings, every line commented (§6.12)
 │
 ├── packages/                  # ← stow packages; ONLY these are stowed
 │   ├── zsh/  sheldon/  starship/  ghostty/  tmux/
@@ -478,7 +478,7 @@ The root **`CLAUDE.md`** is repo-specific: "adding a tool takes these three step
 
 ### 6.12 macOS Defaults
 
-`macos/defaults.sh` — about 25 settings, each preceded by a comment explaining what it does. `dot bootstrap` **asks for confirmation** (bypassed with `--yes`, never prompted in CI).
+`macos/defaults.sh` — 30 settings, each preceded by a comment explaining what it does. The design said "roughly 25"; the list that survived review is 30, and `--dry-run` generates its preview from those comments so the count cannot silently drift. `dot bootstrap` **asks for confirmation** (bypassed with `--yes`, never prompted in CI).
 
 Scope: key repeat rate and delay · `ApplePressAndHoldEnabled false` · Finder (show extensions, path and status bars, hidden files, list view, no `.DS_Store` on network volumes) · Dock (autohide, no delay, no recents, size) · screenshots (saved to `~/Desktop/Screenshots`, PNG, no shadow). Sleep and energy settings are left alone.
 
