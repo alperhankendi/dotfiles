@@ -102,6 +102,10 @@ esac
 
 assert_exit 1 "dot brew rejects an unknown option" "$DOT" brew --nonsense
 
+# cmd_update must reject any argument before it touches brew — this call
+# never reaches a real `brew update` because the rejection happens first.
+assert_exit 1 "dot update rejects any argument" "$DOT" update --dry-run
+
 assert_exit 0 "dot macos --help exits 0" bash "$ROOT/macos/defaults.sh" --help
 assert_stdout_contains "would change" "defaults.sh --dry-run explains itself" \
   bash "$ROOT/macos/defaults.sh" --dry-run
@@ -125,9 +129,17 @@ assert_exit 1 "bootstrap rejects unknown flags" "$DOT" bootstrap --nonsense
 
 # Same failure mode as the macos dry-run: a section added to cmd_bootstrap
 # without the preview knowing would silently under-report what the installer
-# does. Pin them together.
+# does. Pin them together — deriving the expected count independently of the
+# generator's own awk/grep pipeline, so a shared bug in that pipeline cannot
+# pass silently.
+#
+# A plain `grep -c '^  section "'` over the whole file overcounts: cmd_update
+# calls section() at the same two-space indentation, so its lines would be
+# counted too. Stopping at the `cmd_update()` line scopes the count to
+# cmd_bootstrap (and bootstrap_local_file, which has no section() calls of
+# its own) without relying on the closing-brace matching the generator uses.
 boot_listed="$("$DOT" bootstrap --dry-run | grep -cE '^[[:space:]]+[0-9]+\. ')"
-boot_actual="$(awk '/^cmd_bootstrap\(\)/,/^}/' "$ROOT/bin/dot" | grep -cE 'section "[A-Za-z][^"]*"')"
+boot_actual="$(sed '/^cmd_update()/q' "$ROOT/bin/dot" | grep -c '^  section "')"
 if [ "$boot_listed" = "$boot_actual" ]; then
   printf '  ok   bootstrap --dry-run lists all %s sections\n' "$boot_actual"
 else

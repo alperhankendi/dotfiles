@@ -60,7 +60,7 @@ main() {
       cmd_bootstrap "$@"
       ;;
     update)
-      cmd_update
+      cmd_update "$@"
       ;;
     *)
       err "unknown command: $cmd"
@@ -105,23 +105,53 @@ cmd_bootstrap() {
     exit 0
   fi
 
-  # Homebrew needs root to create /opt/homebrew. Ask once, up front, so a long
-  # run cannot stall on a password prompt ten minutes in.
+  # Two things need a person, and both are asked here, once, at the very
+  # start, before Homebrew or anything else runs: the administrator password
+  # (so Homebrew can create /opt/homebrew) and whether to apply macOS system
+  # defaults, which are actually applied later, at step 11.
   #
-  # The test opens /dev/tty rather than checking stdin: the documented entry
-  # point is `curl ... | bash`, where stdin is a pipe and `[ -t 0 ]` is always
-  # false even with a terminal attached. CI has no controlling terminal, so the
-  # open fails there and priming is skipped — the safe direction.
-  if ! have brew && ( : </dev/tty ) 2>/dev/null; then
-    section "Administrator access"
-    info "Homebrew needs to create /opt/homebrew — asking for your password once"
-    # SC2024: the concern is a file the invoking user cannot read being opened
-    # without sudo's privileges. /dev/tty is the user's own controlling
-    # terminal, already readable by them, so that concern does not apply here.
-    # shellcheck disable=SC2024
-    sudo -v </dev/tty
-    # Refresh in the background so it cannot expire mid-run.
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+  # Both open /dev/tty rather than checking stdin: the documented entry point
+  # is `curl ... | bash`, where stdin is a pipe and `[ -t 0 ]` is always false
+  # even with a terminal attached. Reading /dev/tty means both prompts still
+  # appear under that pipe. CI has no controlling terminal, so the open fails
+  # there and both are skipped — the safe direction.
+  section "Up-front prompts"
+  local have_tty=0
+  if ( : </dev/tty ) 2>/dev/null; then
+    have_tty=1
+  fi
+
+  if ! have brew; then
+    if [ "$have_tty" -eq 1 ]; then
+      info "Homebrew needs to create /opt/homebrew — asking for your password once"
+      # SC2024: the concern is a file the invoking user cannot read being
+      # opened without sudo's privileges. /dev/tty is the user's own
+      # controlling terminal, already readable by them, so that concern does
+      # not apply here.
+      # shellcheck disable=SC2024
+      sudo -v </dev/tty
+      # Refresh in the background so it cannot expire mid-run.
+      while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+    else
+      info "no controlling terminal — Homebrew's own installer will ask for the password"
+    fi
+  fi
+
+  local apply_macos_defaults=0 macos_defaults_skipped=0
+  if [ "$skip_macos" -eq 1 ]; then
+    info "macOS defaults: will skip (--skip-macos)"
+  elif [ "$assume_yes" -eq 1 ]; then
+    apply_macos_defaults=1
+    info "macOS defaults: will apply at step 11 (--yes)"
+  elif [ "$have_tty" -eq 1 ]; then
+    printf 'Apply macOS system defaults later in this run? [y/N] '
+    read -r macos_reply </dev/tty
+    case "$macos_reply" in
+      [yY] | [yY][eE][sS]) apply_macos_defaults=1 ;;
+      *) apply_macos_defaults=0 ;;
+    esac
+  else
+    info "no controlling terminal — macOS defaults will be skipped"
   fi
 
   section "Homebrew"
@@ -174,15 +204,18 @@ cmd_bootstrap() {
   section "Neovim plugins"
   nvim --headless "+Lazy! sync" +qa || warn "nvim plugin sync reported a problem"
 
-  if [ "$skip_macos" -eq 0 ]; then
-    section "macOS defaults"
-    if [ "$assume_yes" -eq 1 ]; then
-      bash "$DOT_ROOT/macos/defaults.sh" --yes
-    else
-      bash "$DOT_ROOT/macos/defaults.sh"
-    fi
+  # The question was already asked above, at the very start; this step only
+  # acts on the answer, non-interactively, so it cannot stall twenty-plus
+  # minutes into an unattended run.
+  section "macOS defaults"
+  if [ "$skip_macos" -eq 1 ]; then
+    info "skipping macOS defaults (--skip-macos)"
+    macos_defaults_skipped=1
+  elif [ "$apply_macos_defaults" -eq 1 ]; then
+    bash "$DOT_ROOT/macos/defaults.sh" --yes
   else
-    info "skipping macOS defaults"
+    info "skipping macOS defaults (declined earlier, or no controlling terminal)"
+    macos_defaults_skipped=1
   fi
 
   section "Doctor"
@@ -190,6 +223,11 @@ cmd_bootstrap() {
   bash "$DOT_ROOT/scripts/doctor.sh" || doctor_status=$?
 
   printf '\n'
+  if [ "$macos_defaults_skipped" -eq 1 ]; then
+    warn "=================================================================="
+    warn "macOS system defaults were NOT applied this run. Run: dot macos"
+    warn "=================================================================="
+  fi
   if [ "$doctor_status" -eq 0 ]; then
     info "bootstrap complete — open a new terminal"
   else
@@ -216,6 +254,8 @@ bootstrap_local_file() {
 }
 
 cmd_update() {
+  [ "$#" -eq 0 ] || die "dot update accepts no options (got: $1)"
+
   section "Homebrew"
   brew update
   brew upgrade
