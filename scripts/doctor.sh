@@ -33,6 +33,15 @@ check_homebrew() {
   fi
 }
 
+check_binaries() {
+  section "PATH"
+  # The ten binaries PLAN.md section 8 promises a PATH check for.
+  local bin
+  for bin in eza bat fzf zoxide atuin starship sheldon tmux mise nvim; do
+    require_command "$bin" "run: dot brew"
+  done
+}
+
 check_symlinks() {
   section "Symlinks"
   local pkg pkg_dir src rel target linked missing broken
@@ -104,6 +113,29 @@ check_bundle() {
   fi
 }
 
+# median_of_three <a> <b> <c> — prints the middle value. No external sort
+# needed; this only ever has to handle exactly three numbers.
+median_of_three() {
+  local a="$1" b="$2" c="$3"
+  if { [ "$a" -ge "$b" ] && [ "$a" -le "$c" ]; } || { [ "$a" -le "$b" ] && [ "$a" -ge "$c" ]; }; then
+    printf '%s\n' "$a"
+  elif { [ "$b" -ge "$a" ] && [ "$b" -le "$c" ]; } || { [ "$b" -le "$a" ] && [ "$b" -ge "$c" ]; }; then
+    printf '%s\n' "$b"
+  else
+    printf '%s\n' "$c"
+  fi
+}
+
+# now_ms — current time in milliseconds, via perl (portable, no bashism).
+now_ms() { perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000'; }
+
+# check_shell_startup — one function, two related measurements, so they run
+# back to back under comparable conditions instead of racing the page cache
+# as two independent `zsh -i -c` invocations. A single cold sample is noisy
+# (the very first invocation absorbs exec/page-cache costs the rest do not),
+# so a warm-up run is discarded, then three timed samples are taken and their
+# median reported against the 150ms budget. One further startup-plus-prompt
+# sample is taken in the same run and reported against its own 300ms budget.
 check_shell_startup() {
   section "Shell startup"
   # shellcheck disable=SC2088
@@ -116,39 +148,51 @@ check_shell_startup() {
       "measure by hand: time zsh -i -c exit"
     return
   fi
-  local start end ms
-  start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+
+  # Warm-up: discarded, just to get the shell binary and its dotfiles into
+  # the page cache before any sample that counts.
   zsh -i -c exit >/dev/null 2>&1
-  end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
-  # An empty or non-numeric reading means the measurement broke, not that the
-  # shell is instant. Never report success on a shell that was never measured.
-  case "$start$end" in
-    '' | *[!0-9]*)
-      check_fail "startup measurement produced no usable reading" \
-        "measure by hand: time zsh -i -c exit"
-      return
-      ;;
-  esac
-  ms=$((end - start))
-  if [ "$ms" -lt 150 ]; then
-    check_ok "interactive zsh starts in ${ms}ms (budget 150ms)"
+
+  local i start end ms s1 s2 s3
+  for i in 1 2 3; do
+    start="$(now_ms)"
+    zsh -i -c exit >/dev/null 2>&1
+    end="$(now_ms)"
+    # An empty or non-numeric reading means the measurement broke, not that
+    # the shell is instant. Never report success on a shell never measured.
+    case "$start$end" in
+      '' | *[!0-9]*)
+        check_fail "startup measurement produced no usable reading" \
+          "measure by hand: time zsh -i -c exit"
+        return
+        ;;
+    esac
+    ms=$((end - start))
+    case "$i" in
+      1) s1="$ms" ;;
+      2) s2="$ms" ;;
+      3) s3="$ms" ;;
+    esac
+  done
+
+  local median
+  median="$(median_of_three "$s1" "$s2" "$s3")"
+  if [ "$median" -lt 150 ]; then
+    check_ok "interactive zsh starts in ${median}ms (median of 3: ${s1}/${s2}/${s3}ms, budget 150ms)"
   else
-    check_warn "interactive zsh starts in ${ms}ms, over the 150ms budget" \
+    check_warn "interactive zsh starts in ${median}ms (median of 3: ${s1}/${s2}/${s3}ms), over the 150ms budget" \
       "profile with: zsh -i -c 'zmodload zsh/zprof; zprof'"
   fi
-}
 
-check_prompt_render() {
-  section "Prompt render"
-  if ! have perl; then
-    check_fail "cannot measure prompt render: perl is missing" \
-      "measure by hand: time zsh -i -c 'for f in \$precmd_functions; do \$f; done; print -rP \"\$PROMPT\$RPROMPT\"'"
-    return
-  fi
-  local start end ms
-  start="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  # This repeats a full shell startup and then renders the prompt once, so on
+  # average it costs more than the startup figure above — but it is a single
+  # separate zsh invocation racing the same page cache the warm-up above was
+  # meant to settle, so a single pair of samples is not guaranteed to be
+  # ordered that way. The median above is the number to trust for the
+  # startup budget; this one is its own, independent budget.
+  start="$(now_ms)"
   zsh -i -c 'for f in $precmd_functions; do $f; done; print -rP "$PROMPT$RPROMPT"' >/dev/null 2>&1
-  end="$(perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000')"
+  end="$(now_ms)"
   case "$start$end" in
     '' | *[!0-9]*)
       check_fail "prompt render measurement produced no usable reading" \
@@ -157,8 +201,6 @@ check_prompt_render() {
       ;;
   esac
   ms=$((end - start))
-  # This includes shell startup, so it is always larger than the startup
-  # number above; what matters is the gap between them.
   if [ "$ms" -lt 300 ]; then
     check_ok "shell startup plus one prompt render takes ${ms}ms"
   else
@@ -361,7 +403,11 @@ check_cli_tools() {
     if bat --list-themes 2>/dev/null | grep -q 'Catppuccin Mocha'; then
       check_ok "the bat Catppuccin Mocha theme is built"
     else
-      check_fail "the bat theme cache is not built" "run: bat cache --build"
+      # bat has shipped Catppuccin Mocha built in since 0.25 — if it is
+      # missing, the cause is an old bat, not an unbuilt cache. `bat cache
+      # --build` does not add themes that don't ship with the binary.
+      check_fail "the bat Catppuccin Mocha theme is missing" \
+        "run: brew upgrade bat (Catppuccin Mocha ships built in since 0.25)"
     fi
   else
     check_fail "bat is missing" "run: dot brew"
@@ -493,8 +539,8 @@ main() {
   check_homebrew
   check_symlinks
   check_bundle
+  check_binaries
   check_shell_startup
-  check_prompt_render
   check_local_files
   check_sheldon
   check_starship
