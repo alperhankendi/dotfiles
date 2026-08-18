@@ -56,6 +56,10 @@ Classics replaced: `ls`→eza, `cat`→bat, `diff`→delta, `cd`→zoxide,
 `grep`→ripgrep, `find`→fd, `du`→dust, `df`→duf, `ps`→procs, `top`→btop,
 `man`→tldr, `rm`→trash.
 
+Containers run on **colima** with the plain `docker` and `docker compose`
+clients — no Docker Desktop, no OrbStack, both of which need a paid licence
+for commercial use. Run `colima start` once per boot before using docker.
+
 ## Commands
 
 | Command | What it does |

@@ -569,6 +569,42 @@ check_claude() {
   fi
 }
 
+check_containers() {
+  section "Containers"
+  if ! have colima || ! have docker; then
+    check_fail "colima or docker is missing" "run: dot brew"
+    return
+  fi
+
+  # `docker compose` is a plugin Homebrew installs outside docker's default
+  # search path, so it only works once ~/.docker/config.json registers the
+  # directory. Without that registration `docker compose` reports
+  # "unknown command" — verified. That file also holds registry credentials
+  # after `docker login`, which is why it is seeded from a template into
+  # $HOME rather than symlinked into this repository.
+  if docker compose version >/dev/null 2>&1; then
+    check_ok "the docker compose plugin is registered"
+  else
+    check_fail "docker compose is not registered" \
+      "copy packages/docker/.docker/config.json.example to ~/.docker/config.json"
+  fi
+
+  # A stopped VM is a normal resting state, not a broken environment — you
+  # start it when you need containers. Failing here would make doctor red on
+  # every ordinary day and teach the owner to ignore it.
+  if colima status >/dev/null 2>&1; then
+    if docker info >/dev/null 2>&1; then
+      check_ok "colima is running and the docker daemon answers"
+    else
+      check_fail "colima is running but the docker daemon does not answer" \
+        "run: colima delete && colima start"
+    fi
+  else
+    check_warn "colima is not running; docker commands will fail until it is" \
+      "run: colima start"
+  fi
+}
+
 main() {
   check_homebrew
   check_symlinks
@@ -583,6 +619,7 @@ main() {
   check_cli_tools
   check_neovim
   check_claude
+  check_containers
   printf '\n'
   if [ "$DOCTOR_FAILED" -eq 0 ]; then
     info "doctor: all checks passed"

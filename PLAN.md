@@ -54,7 +54,8 @@ All made in this session. They can change, but only with a stated reason.
 | 2.12 | Runtimes | **mise** | node/python/go pinned in a single binary. None of the ~300 ms nvm adds to shell startup |
 | 2.13 | Splits | **In tmux** | No split keybinds defined in Ghostty — no shortcut collisions across two layers |
 | 2.14 | Editor | **LazyVim** | The reference setup, minus the iOS-specific pieces |
-| 2.15 | Secrets | **Gitignored `*.local` files** | `~/.config/git/local` and `~/.config/zsh/local.zsh`, with `.example` templates in the repo |
+| 2.15 | Secrets | **Gitignored `*.local` files** | `~/.config/git/local`, `~/.config/zsh/local.zsh` and `~/.docker/config.json`, with `.example` templates in the repo |
+| 2.19 | Containers | **colima plus the docker CLI** | Added after the build. Docker Desktop and OrbStack both require a paid licence for commercial use; colima is open source and terminal-first. `docker compose` needs `~/.docker/config.json` to register Homebrew's plugin directory, and that same file stores registry credentials, so it is seeded from a template rather than symlinked |
 | 2.16 | Brewfile | **Core plus CLI**, GUI in a separate file | A curated list, not a `brew bundle dump` inventory |
 | 2.17 | macOS defaults | **30 settings, prompted during install** | `dot bootstrap` asks for confirmation; `--yes` / `--skip-macos` bypass it |
 | 2.18 | AI layer | `~/.claude` package, repo-management commands, starship status line | Other AI CLIs (Codex/Gemini) are out of scope |
@@ -186,6 +187,11 @@ brew "jq"; brew "yq"
 
 # Git and dev
 brew "git"; brew "gh"; brew "lazygit"; brew "neovim"; brew "mise"; brew "trash"
+
+# Containers
+brew "colima"          # the Linux VM the daemon runs in
+brew "docker"          # client only, no Docker Desktop
+brew "docker-compose"
 ```
 
 **`homebrew/Brewfile.gui`** — `ghostty`, `font-anka-coder`, `font-symbols-only-nerd-font`, and whatever GUI apps get added over time. Skipped in CI and headless installs via `--skip-gui`.
@@ -574,6 +580,7 @@ git clone https://github.com/alperhankendi/dotfiles.git ~/workspace/dotfiles-nex
 
 What remains manual afterward:
 1. Fill in `~/.config/git/local` and `~/.config/zsh/local.zsh` (`dot doctor` reminds you)
+2. Start the container VM once with `colima start` — `dot doctor` warns until you do
 2. Open Ghostty and confirm the font name with `ghostty +list-fonts | grep -i anka`
 3. Install the tmux plugins with `prefix + I`
 4. Test `jump_to_prompt` inside tmux (the cost noted in §6.5)

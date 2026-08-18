@@ -184,6 +184,10 @@ cmd_bootstrap() {
     "$HOME/.config/git/local"
   bootstrap_local_file "$DOT_ROOT/packages/zsh/.config/zsh/local.zsh.example" \
     "$HOME/.config/zsh/local.zsh"
+  # Docker writes registry credentials here after `docker login`, so it is
+  # created from the template rather than symlinked into the repository.
+  bootstrap_local_file "$DOT_ROOT/packages/docker/.docker/config.json.example" \
+    "$HOME/.docker/config.json"
 
   section "tmux plugins"
   if [ ! -d "$HOME/.config/tmux/plugins/tpm" ]; then

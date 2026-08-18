@@ -8,6 +8,8 @@ macos-dot-files-main/
 packages/git/.config/git/local
 packages/zsh/.config/zsh/local.zsh
 packages/ghostty/.config/ghostty/local.conf
+# Docker stores registry credentials in this file once you `docker login`
+packages/docker/.docker/config.json
 
 # Backups produced by `dot link`
 *.bak-*
