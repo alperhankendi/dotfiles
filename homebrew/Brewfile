@@ -36,6 +36,7 @@ brew "lazygit"
 brew "neovim"
 brew "mise"
 brew "trash"
+brew "entr"             # rerun a command when files change (gorun)
 
 # Containers — colima runs the VM, docker/compose are the clients.
 # Deliberately not Docker Desktop or OrbStack: both need a paid licence for
@@ -43,3 +44,4 @@ brew "trash"
 brew "colima"
 brew "docker"
 brew "docker-compose"
+brew "kubernetes-cli"   # kubectl; starship shows the active context
