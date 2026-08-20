@@ -44,16 +44,20 @@ check_binaries() {
 
 check_symlinks() {
   section "Symlinks"
-  local pkg pkg_dir src rel target linked missing broken
+  local pkg pkg_dir src rel target linked missing broken templates
   for pkg in $(dot_packages); do
     pkg_dir="$DOT_ROOT/packages/$pkg"
     linked=0
     missing=0
     broken=0
+    templates=0
     while IFS= read -r src; do
       rel="${src#"$pkg_dir"/}"
       case "$rel" in
-        *.example) continue ;;
+        *.example)
+          templates=$((templates + 1))
+          continue
+          ;;
       esac
       target="$HOME/$rel"
       if [ -L "$target" ]; then
@@ -71,6 +75,13 @@ check_symlinks() {
       check_fail "$pkg has $broken broken symlink(s)" "run: dot link $pkg"
     elif [ "$missing" -gt 0 ]; then
       check_fail "$pkg is not fully linked ($missing file(s) missing)" "run: dot link $pkg"
+    elif [ "$linked" -eq 0 ] && [ "$templates" -gt 0 ]; then
+      # A package that ships only .example files is finished, not empty: its
+      # payload is copied into $HOME by `dot bootstrap` because the live file
+      # collects secrets (docker registry credentials, for one) and must never
+      # point back into the repository. Warning here would tell the owner to
+      # "add configuration" that deliberately does not belong in the package.
+      check_ok "$pkg ships templates only ($templates file(s)); nothing to link"
     elif [ "$linked" -eq 0 ]; then
       check_warn "$pkg contains no linkable files" "add configuration under packages/$pkg"
     else
