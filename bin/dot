@@ -9,6 +9,9 @@ set -euo pipefail
 # shellcheck source=scripts/link.sh
 . "$DOT_ROOT/scripts/link.sh"
 
+# shellcheck source=scripts/lang.sh
+. "$DOT_ROOT/scripts/lang.sh"
+
 usage() {
   cat <<'EOF'
 Usage: dot <command> [options]
@@ -19,6 +22,8 @@ Commands:
   link [package...]   Symlink packages into $HOME (default: all)
   unlink [package...] Remove those symlinks
   brew [--gui]        Install Homebrew packages
+  lang [--list | <language>...]
+                      Pick and install language toolchains
   macos               Apply macOS system defaults
   update              Update Homebrew, plugins, and runtimes
   doctor              Check that everything is in place
@@ -52,6 +57,9 @@ main() {
       if [ "${1:-}" = "--gui" ]; then
         brew bundle --file="$DOT_ROOT/homebrew/Brewfile.gui"
       fi
+      ;;
+    lang)
+      cmd_lang "$@"
       ;;
     macos)
       bash "$DOT_ROOT/macos/defaults.sh" "$@"

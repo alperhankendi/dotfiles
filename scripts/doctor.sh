@@ -42,6 +42,28 @@ check_binaries() {
   done
 }
 
+check_mise_tools() {
+  section "mise tools"
+
+  if ! have mise; then
+    check_fail "mise is missing" "run: dot brew"
+    return
+  fi
+
+  # Ask mise what it considers missing rather than naming the tools here, so
+  # adding one to packages/mise/.config/mise/config.toml needs no edit in this
+  # file. Column one of `mise ls --missing` is the tool name; empty output
+  # means everything declared is installed.
+  local missing
+  missing=$(mise ls --missing 2>/dev/null | awk 'NF { printf "%s ", $1 }')
+  if [ -n "$missing" ]; then
+    check_fail "tools declared in the mise config are not installed: ${missing% }" \
+      "run: mise install"
+  else
+    check_ok "every tool in the mise config is installed"
+  fi
+}
+
 check_symlinks() {
   section "Symlinks"
   local pkg pkg_dir src rel target linked missing broken templates
@@ -621,6 +643,7 @@ main() {
   check_symlinks
   check_bundle
   check_binaries
+  check_mise_tools
   check_shell_startup
   check_local_files
   check_sheldon

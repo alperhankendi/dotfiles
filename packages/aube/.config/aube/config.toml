@@ -1,0 +1,13 @@
+# aube — the npm package manager mise uses for its `npm:` backend.
+# Only reached through `mise install`; nothing here is for interactive use.
+
+# aube refuses to add a package with fewer than 1000 weekly downloads
+# (lowDownloadThreshold), a typosquat guard that fires on day-one
+# impersonations. @ctxo/cli is published by the owner of this repository and
+# sits well under that floor, so it is exempted by name rather than lowering
+# the threshold globally.
+#
+# Deliberately narrow: this list suppresses only the reputation gates
+# (similar-name, package-age, low-download). The OSV MAL-* advisory check is
+# unaffected, so a confirmed-malicious package is still refused.
+allowedUnpopularPackages = ["@ctxo/*"]

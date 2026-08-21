@@ -1,9 +1,30 @@
-# Runtime versions. Add a language here rather than installing it with brew,
-# so projects can pin their own version with a local .mise.toml.
+# Tools managed by mise. Languages are recorded here by `dot lang`; the npm
+# block is hand-maintained. mise appends new [tools] entries to the end of
+# the table, which is why the languages come last.
 
 [tools]
+# CLI tools that ship only on npm. They live here rather than in
+# homebrew/Brewfile because `dot bootstrap` runs `brew bundle` before
+# `mise install`: an npm entry in the Brewfile would run on a fresh machine
+# before node exists. mise resolves them against the node pinned below.
+#
+# aube is mise's npm backend. Declared explicitly because mise otherwise
+# offers to install it behind an interactive prompt, which aborts under
+# `dot bootstrap --yes` and in CI.
+#
+# Both are tracked as "latest" deliberately — `dot update` runs `mise
+# upgrade`, which leaves an exact pin frozen forever. The cost is that the
+# versions are not reproducible from this file.
+aube = "latest"              # npm backend for the tool below
+"npm:@ctxo/cli" = "latest"   # ctxo — dependency-aware code context MCP server
+
+# Languages. Major pins: specific enough to reproduce a machine, loose
+# enough that `dot update` picks up patch releases without a repo edit.
+# Add one with `dot lang` rather than editing this block by hand — and never
+# with brew, so a project can still pin its own version in a local .mise.toml.
 node = "22"
 python = "3.13"
+java = "temurin-11"          # hb-productupload builds against 11
 
 [settings]
 python.uv_venv_auto = true

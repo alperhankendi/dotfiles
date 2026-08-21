@@ -68,6 +68,7 @@ for commercial use. Run `colima start` once per boot before using docker.
 | `dot link [pkg]` | Symlink packages into `$HOME` |
 | `dot unlink [pkg]` | Remove those symlinks |
 | `dot brew [--gui]` | Install Homebrew packages |
+| `dot lang [--list \| <lang>]` | Pick and install language toolchains (dotnet, go, java, python, zig, C/C++) |
 | `dot macos` | Apply macOS system defaults (no root needed) |
 | `dot update` | Update everything, then leave the lock files for you to review and commit |
 | `dot doctor` | Check that everything is in place |

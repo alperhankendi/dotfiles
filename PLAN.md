@@ -141,6 +141,7 @@ One entry point. Humans and agents use the same interface.
 | `dot link [package...]` | `stow --no-folding --restow`. With no arguments: every package |
 | `dot unlink [package...]` | `stow -D` |
 | `dot brew [--gui]` | `brew bundle --file=homebrew/Brewfile` (plus `.gui`) |
+| `dot lang [--list \| <language>...]` | Language toolchains. With no arguments it prints the catalogue with live install state and prompts for a selection; named languages skip the menu. The choice is recorded in the repository (mise config, or the Brewfile for `cpp`), never only on the machine |
 | `dot macos` | Runs `macos/defaults.sh` |
 | `dot update` | `brew update && brew upgrade && brew bundle` · `sheldon lock --update` · `mise upgrade` · TPM update · `nvim --headless "+Lazy! sync" +qa`, then leaves the lock files staged for review |
 | `dot doctor` | §8 |
@@ -196,7 +197,7 @@ brew "docker-compose"
 
 **`homebrew/Brewfile.gui`** — `ghostty`, `font-anka-coder`, `font-symbols-only-nerd-font`, and whatever GUI apps get added over time. Skipped in CI and headless installs via `--skip-gui`.
 
-There is no `Brewfile.lock.json` — Homebrew 6 removed the lockfile concept entirely, so the Brewfile pins the tool set rather than the versions (principle 4). The `mas`, `vscode`, `go`, and `npm` blocks are **not used**.
+There is no `Brewfile.lock.json` — Homebrew 6 removed the lockfile concept entirely, so the Brewfile pins the tool set rather than the versions (principle 4). The `mas`, `vscode`, and `go` blocks are **not used**, and neither is `npm` — `brew bundle` supports an `npm` directive, but `dot bootstrap` runs `brew bundle` before `mise install`, so an npm entry here would run on a fresh machine before node exists. npm-only CLI tools go in the mise config instead (§6.9).
 
 Adding a tool → §7.
 
@@ -436,7 +437,7 @@ Plus `packages/git/.config/git/ignore` for the global ignore list (`.DS_Store`, 
 | **delta** | `packages/delta/.config/delta/catppuccin.gitconfig` | **Divergence from the reference:** it clones the `catppuccin/delta` repo during bootstrap, a hidden external dependency. We **vendor** the ~30-line theme instead |
 | **bat** | `packages/bat/.config/bat/config` | **Corrected during implementation:** bat 0.26.1 ships Catppuccin Latte, Frappe, Macchiato and Mocha built in, verified against an empty config directory. No theme file is vendored and no `bat cache --build` is needed — both were in the original plan and both were unnecessary. `scripts/doctor.sh`'s fix hint for a missing theme is `brew upgrade bat`, not `bat cache --build`: a missing built-in theme means an old bat, and rebuilding a cache does not add themes the binary does not ship |
 | **atuin** | `packages/atuin/.config/atuin/config.toml` | ~20 lines: `auto_sync = false`, `update_check = false`, `enter_accept = true`, `style = compact`. The reference's 300 lines of commented-out defaults are not carried over |
-| **mise** | `packages/mise/.config/mise/config.toml` | node and python pinned; others added when needed |
+| **mise** | `packages/mise/.config/mise/config.toml` | node and python pinned. Also the home for npm-only CLI tools (`aube`, the npm backend, plus `npm:@ctxo/cli`) and for every language `dot lang` installs — mise sets `JAVA_HOME` and friends itself, so no runtime exports live in the zsh config |
 | **eza / fzf / zoxide** | `exports.zsh` and `aliases.zsh` | No separate config file; Catppuccin fzf colors live in `FZF_DEFAULT_OPTS` |
 
 **Alias migration table** (old repo → new):
@@ -591,7 +592,7 @@ What remains manual afterward:
 
 Deliberately not built. Any of these can be added later as its own decision:
 
-work/personal profiles · Linux and devcontainer support · chezmoi or nix · `mas`/`vscode`/`npm` inventories · Codex and Gemini CLI configs · 1Password, age, or sops · Ghostty custom shaders · a full-install CI job on a macOS runner · embedded fonts or binaries in the repo · system info or update checks on every shell startup.
+work/personal profiles · Linux and devcontainer support · chezmoi or nix · `mas`/`vscode` inventories · Codex and Gemini CLI configs · 1Password, age, or sops · Ghostty custom shaders · a full-install CI job on a macOS runner · embedded fonts or binaries in the repo · system info or update checks on every shell startup.
 
 ---
 
