@@ -137,7 +137,7 @@ One entry point. Humans and agents use the same interface.
 
 | Command | What it does |
 |---------|--------------|
-| `dot bootstrap [--yes] [--skip-macos] [--skip-gui]` | Full install: Xcode CLT → Homebrew → `brew bundle` → `sheldon lock` → `dot link` → TPM and tmux plugins → `mise install` → macOS defaults (prompted) → `dot doctor` |
+| `dot bootstrap [--yes] [--skip-macos] [--skip-gui] [--skip-lang]` | Full install: Xcode CLT → Homebrew → `brew bundle` → `sheldon lock` → `dot link` → TPM and tmux plugins → `mise install` → languages (prompted) → macOS defaults (prompted) → `dot doctor`. Both prompts are asked up front, before Homebrew runs, and acted on later; `--yes` selects no languages rather than all of them |
 | `dot link [package...]` | `stow --no-folding --restow`. With no arguments: every package |
 | `dot unlink [package...]` | `stow -D` |
 | `dot brew [--gui]` | `brew bundle --file=homebrew/Brewfile` (plus `.gui`) |

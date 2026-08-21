@@ -51,6 +51,10 @@ lang_status() {
 
   case "$backend" in
     brew)
+      # During `dot bootstrap` the menu is shown before Homebrew exists.
+      # Nothing is installed on that machine yet, so this is accurate rather
+      # than a fallback.
+      have brew || { printf 'not installed\n'; return 0; }
       for formula in $spec; do
         if ! brew list --formula "$formula" >/dev/null 2>&1; then
           printf 'not installed\n'
@@ -60,6 +64,7 @@ lang_status() {
       printf 'installed\n'
       ;;
     *)
+      have mise || { printf 'not installed\n'; return 0; }
       version=$(mise ls --installed "$id" 2>/dev/null | awk 'NR == 1 { print $2 }')
       if [ -n "$version" ]; then
         printf 'installed (%s)\n' "$version"
@@ -149,10 +154,36 @@ lang_install() {
     have brew || die "Homebrew is missing — run: dot bootstrap"
     brew bundle --file="$DOT_ROOT/homebrew/Brewfile"
   fi
+}
 
-  printf '\n'
-  info "done — the choice is recorded in the repository; commit it to keep it"
-  info "run: dot doctor"
+# lang_prompt — show the menu, read one line, echo the chosen ids.
+# Split out from cmd_lang because `dot bootstrap` asks the same question at
+# the very start of a run and installs the answer much later, once mise
+# exists. Writes the menu to stderr so the ids stay the only thing on stdout.
+lang_prompt() {
+  local reply picked
+
+  # Loops until the answer is valid or empty. A typo has to be re-asked
+  # rather than dropped: lang_resolve's `die` only exits this function's
+  # command substitution, so a caller that ignored the status would install
+  # nothing while the person believed they had chosen something.
+  while true; do
+    {
+      section "Languages"
+      lang_table
+      printf '\nSelect by number or name, space separated (empty installs none): '
+    } >&2
+
+    IFS= read -r reply </dev/tty || reply=""
+    [ -n "$reply" ] || return 0
+
+    # shellcheck disable=SC2086  # $reply is a list of tokens by design
+    if picked=$(lang_resolve $reply); then
+      printf '%s\n' "$picked" | sort -u
+      return 0
+    fi
+    # lang_resolve named the offending token on stderr; ask again.
+  done
 }
 
 # lang_resolve <token>... — map numbers and names alike onto catalogue ids.
@@ -202,25 +233,35 @@ cmd_lang() {
     picked=$(lang_resolve "$@") || return 1
     # shellcheck disable=SC2046  # word splitting is the point: one id per word
     lang_install $(printf '%s\n' "$picked" | sort -u)
+    lang_report_done
     return 0
   fi
 
-  if [ ! -t 0 ]; then
+  # /dev/tty rather than `[ -t 0 ]`: the prompt reads the terminal directly,
+  # so it still works when stdin is a pipe. Testing stdin would refuse a case
+  # that in fact works.
+  if ! ( : </dev/tty ) 2>/dev/null; then
     die "dot lang needs a terminal to prompt — name the languages instead, e.g. dot lang java go"
   fi
 
-  section "Languages"
-  lang_table
-  printf '\nSelect by number or name, space separated (empty cancels): '
-  IFS= read -r reply || reply=""
+  picked=$(lang_prompt) || return 1
 
-  if [ -z "$reply" ]; then
+  if [ -z "$picked" ]; then
     info "nothing selected"
     return 0
   fi
 
-  # shellcheck disable=SC2086  # $reply is a list of tokens by design
-  picked=$(lang_resolve $reply) || return 1
-  # shellcheck disable=SC2046  # one id per word
-  lang_install $(printf '%s\n' "$picked" | sort -u)
+  # shellcheck disable=SC2086  # one id per word
+  lang_install $picked
+  lang_report_done
+}
+
+# lang_report_done — the closing advice for an interactive `dot lang`.
+# Not part of lang_install: `dot bootstrap` calls that too, and runs doctor
+# itself a few steps later, so telling the owner to run doctor there would be
+# advice they are already about to take.
+lang_report_done() {
+  printf '\n'
+  info "done — the choice is recorded in the repository; commit it to keep it"
+  info "run: dot doctor"
 }

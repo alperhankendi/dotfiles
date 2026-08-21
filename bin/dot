@@ -17,7 +17,7 @@ usage() {
 Usage: dot <command> [options]
 
 Commands:
-  bootstrap [--yes] [--skip-macos] [--skip-gui]
+  bootstrap [--yes] [--skip-macos] [--skip-gui] [--skip-lang]
                       Full install on a fresh machine
   link [package...]   Symlink packages into $HOME (default: all)
   unlink [package...] Remove those symlinks
@@ -79,13 +79,15 @@ main() {
 }
 
 cmd_bootstrap() {
-  local assume_yes=0 skip_macos=0 skip_gui=0 dry_run=0
+  local assume_yes=0 skip_macos=0 skip_gui=0 skip_lang=0 dry_run=0
+  local lang_selection=""
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --yes) assume_yes=1 ;;
       --skip-macos) skip_macos=1 ;;
       --skip-gui) skip_gui=1 ;;
+      --skip-lang) skip_lang=1 ;;
       --dry-run) dry_run=1 ;;
       *) err "unknown bootstrap option: $1"; exit 1 ;;
     esac
@@ -116,7 +118,7 @@ cmd_bootstrap() {
   # Two things need a person, and both are asked here, once, at the very
   # start, before Homebrew or anything else runs: the administrator password
   # (so Homebrew can create /opt/homebrew) and whether to apply macOS system
-  # defaults, which are actually applied later, at step 11.
+  # defaults, which are actually applied later, at the "macOS defaults" step.
   #
   # Both open /dev/tty rather than checking stdin: the documented entry point
   # is `curl ... | bash`, where stdin is a pipe and `[ -t 0 ]` is always false
@@ -150,7 +152,7 @@ cmd_bootstrap() {
     info "macOS defaults: will skip (--skip-macos)"
   elif [ "$assume_yes" -eq 1 ]; then
     apply_macos_defaults=1
-    info "macOS defaults: will apply at step 11 (--yes)"
+    info "macOS defaults: will apply at the macOS defaults step (--yes)"
   elif [ "$have_tty" -eq 1 ]; then
     printf 'Apply macOS system defaults later in this run? [y/N] '
     read -r macos_reply </dev/tty
@@ -160,6 +162,27 @@ cmd_bootstrap() {
     esac
   else
     info "no controlling terminal — macOS defaults will be skipped"
+  fi
+
+  # Same contract as the macOS question: asked here, acted on at the
+  # "Languages" step. Section names rather than step numbers, because
+  # inserting a section renumbers every one after it.
+  # --yes deliberately selects nothing rather than everything — which
+  # languages someone wants is not a safe default to guess, and `dot lang`
+  # is there for afterwards.
+  if [ "$skip_lang" -eq 1 ]; then
+    info "languages: will skip (--skip-lang)"
+  elif [ "$assume_yes" -eq 1 ]; then
+    info "languages: none selected (--yes) — pick them later with: dot lang"
+  elif [ "$have_tty" -eq 1 ]; then
+    lang_selection="$(lang_prompt)" || lang_selection=""
+    if [ -n "$lang_selection" ]; then
+      info "languages: will install at the Languages step ($(printf '%s' "$lang_selection" | tr '\n' ' '))"
+    else
+      info "languages: none selected — pick them later with: dot lang"
+    fi
+  else
+    info "no controlling terminal — no languages will be installed"
   fi
 
   section "Homebrew"
@@ -212,6 +235,16 @@ cmd_bootstrap() {
 
   section "Runtimes"
   mise install
+
+  # The question was already asked above, at the very start; this step only
+  # acts on the answer, non-interactively.
+  section "Languages"
+  if [ -n "$lang_selection" ]; then
+    # shellcheck disable=SC2086  # one id per word
+    lang_install $lang_selection
+  else
+    info "no languages selected — add them later with: dot lang"
+  fi
 
   section "Neovim plugins"
   nvim --headless "+Lazy! sync" +qa || warn "nvim plugin sync reported a problem"
